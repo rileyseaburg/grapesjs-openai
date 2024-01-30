@@ -10,7 +10,8 @@
   "scripts": {
     "start": "grapesjs-cli serve",
     "build": "grapesjs-cli build",
-    "bump": "npm version patch -m 'Bump v%s'"
+    "bump": "npm version patch -m 'Bump v%s'",
+    "release": "npm run bump && npm run build && npm publish && git push --follow-tags"
   },
   "keywords": [
     "grapesjs",
