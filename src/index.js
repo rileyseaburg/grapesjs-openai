@@ -41,10 +41,19 @@ export default (editor, opts = {}) => {
         const selectedText = component.getInnerHTML();
         console.log('Selected text:', selectedText);
 
+        // clean up the HTML to get the raw text
+        selectedText.replace(/<[^>]+>/g, '');
+
+        // remove /n from the text
+        selectedText.replace(/\n/g, '');
+
         let html = editor.getHtml();
         let parser = new DOMParser();
         let doc = parser.parseFromString(html, 'text/html');
         let rawText = doc.body.textContent;
+
+        rawText.replace(/\n/g, '');
+        rawText.replace(/<[^>]+>/g, '');
 
         // Find the start index of the selected text
         let selectedIndex = rawText.indexOf(selectedText);
@@ -54,6 +63,9 @@ export default (editor, opts = {}) => {
 
         // Extract text after the selected text
         let postText = rawText.substring(selectedIndex + selectedText.length);
+
+
+
 
         console.log('Text before selected text:', preText);
         console.log('Text after selected text:', postText);
@@ -76,10 +88,11 @@ export default (editor, opts = {}) => {
             },
             {
               "role": "user",
-              "content": "Please insert the sales copy in the [Insert Here] section. Only include the sales copy for the section, do not include the messages from the text before or after."
+              "content": "Please insert the sales copy in the [Insert Here] section. Only include the sales copy for the section, do not include the messages from the text before or after. If it seems like there is already sales copy, go deeper and write more. Never stop writing. If there is lorem ipsum, delete it and write your own sales copy. Do the same with any weird text that doesn't make sense."
+              
             },
             {
-              "role": "system",
+              "role": "user",
               "content": "Here is the sales copy:"
             },
             {
