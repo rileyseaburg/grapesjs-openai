@@ -83,7 +83,9 @@ Directly in the browser
       // ...
       plugins: ['grapesjs-openai'],
       pluginsOpts: {
-        'grapesjs-openai': { /* options */ }
+        'grapesjs-openai': { 
+           apiKey: 'your-openai-api-key',
+         }
       }
   });
 </script>
