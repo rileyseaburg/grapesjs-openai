@@ -1,5 +1,5 @@
 {
-  "name": "@rileyseaburg/grapesjs-openai",
+  "name": "@evolvingriley/grapesjs-openai",
   "version": "1.0.0",
   "description": "Grapesjs Openai",
   "main": "dist/index.js",
