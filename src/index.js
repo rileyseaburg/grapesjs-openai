@@ -54,9 +54,8 @@ export default (editor, opts = {}) => {
     const openModal = () => {
       modal.setContent(modelContent);
       modal.open();
-    }
 
-
+      
     // Event listener for the Generate Text button
     document.getElementById('generate-text-btn').addEventListener('click', async function () {
       const detailedPrompt = constructDetailedPromptBasedOnUserInput();
@@ -156,6 +155,9 @@ export default (editor, opts = {}) => {
         console.error('Error getting text from OpenAI:', error);
       }
     });
+
+
+    }
 
 
 
