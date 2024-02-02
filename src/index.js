@@ -6,8 +6,9 @@ import axios from 'axios';
 
 export default (editor, opts = {}) => {
   document.addEventListener('DOMContentLoaded', function () {
-
-    this.document.body.innerHTML += `
+// Get the Modal module from the editor
+const modal = editor.Modal;
+    modal.setContent(`
   
 <!-- Add this HTML inside your GrapesJS editor page -->
 
@@ -48,7 +49,7 @@ export default (editor, opts = {}) => {
     <button class="rounded-md bg-blue-500 text-white px-4 py-2" id="generate-text-btn">Generate Text</button>
   </div>
 </div>
-`;
+`);
 
 
 
@@ -175,7 +176,7 @@ export default (editor, opts = {}) => {
 
     // This function will open the prompt creation UI
     function openPromptCreationUI() {
-      document.getElementById('prompt-creation-modal').style.display = 'block';
+      modal.open();
     }
 
     // Function to construct a detailed prompt based on user input
