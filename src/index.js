@@ -12,7 +12,7 @@ const modal = editor.Modal;
   
 <!-- Add this HTML inside your GrapesJS editor page -->
 
-<div  id="prompt-creation-modal" style="display:none;">
+<div  id="prompt-creation-modal">
   <!-- close button -->
   <div class="absolute top-0 right-0 p-4 z-10">
     <button class="text-2xl" onclick="document.getElementById('prompt-creation-modal').style.display = 'none';">&times;</button>
