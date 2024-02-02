@@ -3,6 +3,54 @@ import loadBlocks from './blocks';
 import axios from 'axios';
 
 export default (editor, opts = {}) => {
+  editor.on('load', () => {
+
+    this.document.body.innerHTML += `
+  
+<!-- Add this HTML inside your GrapesJS editor page -->
+
+<div  id="prompt-creation-modal" style="display:none;">
+  <!-- close button -->
+  <div class="absolute top-0 right-0 p-4 z-10">
+    <button class="text-2xl" onclick="document.getElementById('prompt-creation-modal').style.display = 'none';">&times;</button>
+  </div>
+  <div class="flex flex-col">
+    <label for="section-type">Section Type:</label>
+    <select id="section-type">
+      <option value="header">Header</option>
+      <option value="product-description">Product Description</option>
+      <option value="testimonial">Testimonial</option>
+      <option value="feature">Feature</option>
+      <option value="benefit">Benefit</option>
+      <option value="call-to-action">Call to Action</option>
+    </select>
+  </div>
+  <div class="flex flex-col">
+    <label for="content-focus">Content Focus:</label>
+    <input type="text" id="content-focus" placeholder="e.g., features, benefits">
+  </div>
+  <div class="flex flex-col">
+    <label for="tone-style">Tone/Style:</label>
+    <input type="text" id="tone-style" placeholder="e.g., professional, friendly">
+  </div>
+  <div class="flex flex-col">
+    <label for="word-count">Word Count:</label>
+    <sub>(Optional)</sub>
+    <input class="mt-5" type="number" id="word-count" placeholder="e.g., 100">
+  </div>
+  <div class="flex flex-col">
+    <label for="context-count">Previous Text To Include:</label>
+    <sub class="text-label text-red-500">Required</sub>
+    <input class="mt-5" type="number" id="context-count" placeholder="e.g., 1">
+  <div class="mt-6">
+    <button class="rounded-md bg-blue-500 text-white px-4 py-2" id="generate-text-btn">Generate Text</button>
+  </div>
+</div>
+`;
+
+  });
+
+
   var wordCount = 0;
   var contextCount = 0;
   const options = {
@@ -164,50 +212,3 @@ export default (editor, opts = {}) => {
 };
 
 
-
-
-window.onload = function () {
-  this.document.body.innerHTML += `
-  
-<!-- Add this HTML inside your GrapesJS editor page -->
-
-<div  id="prompt-creation-modal" style="display:none;">
-  <!-- close button -->
-  <div class="absolute top-0 right-0 p-4 z-10">
-    <button class="text-2xl" onclick="document.getElementById('prompt-creation-modal').style.display = 'none';">&times;</button>
-  </div>
-  <div class="flex flex-col">
-    <label for="section-type">Section Type:</label>
-    <select id="section-type">
-      <option value="header">Header</option>
-      <option value="product-description">Product Description</option>
-      <option value="testimonial">Testimonial</option>
-      <option value="feature">Feature</option>
-      <option value="benefit">Benefit</option>
-      <option value="call-to-action">Call to Action</option>
-    </select>
-  </div>
-  <div class="flex flex-col">
-    <label for="content-focus">Content Focus:</label>
-    <input type="text" id="content-focus" placeholder="e.g., features, benefits">
-  </div>
-  <div class="flex flex-col">
-    <label for="tone-style">Tone/Style:</label>
-    <input type="text" id="tone-style" placeholder="e.g., professional, friendly">
-  </div>
-  <div class="flex flex-col">
-    <label for="word-count">Word Count:</label>
-    <sub>(Optional)</sub>
-    <input class="mt-5" type="number" id="word-count" placeholder="e.g., 100">
-  </div>
-  <div class="flex flex-col">
-    <label for="context-count">Previous Text To Include:</label>
-    <sub class="text-label text-red-500">Required</sub>
-    <input class="mt-5" type="number" id="context-count" placeholder="e.g., 1">
-  <div class="mt-6">
-    <button class="rounded-md bg-blue-500 text-white px-4 py-2" id="generate-text-btn">Generate Text</button>
-  </div>
-</div>
-`;
-
-}
