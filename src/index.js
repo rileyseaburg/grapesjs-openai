@@ -3,6 +3,8 @@ import loadBlocks from './blocks';
 import axios from 'axios';
 
 export default (editor, opts = {}) => {
+  var wordCount = 0;
+  var contextCount = 0;
   const options = {
     ...{
 
@@ -18,117 +20,137 @@ export default (editor, opts = {}) => {
   loadBlocks(editor, options);
 
 
-  // Add a new command that fetches text from OpenAI and inserts it at the cursor position
+
+
+  // This function will open the prompt creation UI
+  function openPromptCreationUI() {
+    document.getElementById('prompt-creation-modal').style.display = 'block';
+  }
+
+  // Function to construct a detailed prompt based on user input
+  function constructDetailedPromptBasedOnUserInput() {
+    const sectionType = document.getElementById('section-type').value;
+    const contentFocus = document.getElementById('content-focus').value;
+    const toneStyle = document.getElementById('tone-style').value;
+    wordCount = document.getElementById('word-count').value;
+    contextCount = document.getElementById('context-count').value;
+
+    let prompt = "";
+    if (wordCount < 1) {
+      prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone.`;
+    } else {
+      prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone. The text should be around ${wordCount} words long.`;
+    }
+
+    return prompt;
+
+  }
+
+  // Event listener for the Generate Text button
+  document.getElementById('generate-text-btn').addEventListener('click', async function () {
+    const detailedPrompt = constructDetailedPromptBasedOnUserInput();
+    // Close the modal
+    document.getElementById('prompt-creation-modal').style.display = 'none';
+
+    // Proceed with the API call
+    // ... [Rest of your API call logic here]
+
+    // Assume 'openaiText' is the text received from OpenAI
+    // Show this text to the user for preview and editing
+    // Then update the component with the final text
+    try {
+      let component = editor.getSelected();
+
+      if (!component || !component.is('text')) {
+        console.error('No text component selected.');
+        return;
+      }
+      // Check if the selected component is a text block
+      if (component.get('type') !== 'text') {
+        console.error('Selected component is not a text block');
+        return;
+      }
+
+      const selectedText = component.getInnerHTML();
+
+      // clean up the HTML to get the raw text
+      selectedText.replace(/<[^>]+>/g, '');
+
+      // remove /n from the text
+      selectedText.replace(/\n/g, '');
+      let preText = '';
+      let html = editor.getHtml();
+      let parser = new DOMParser();
+      let doc = parser.parseFromString(html, 'text/html');
+      let rawText = doc.body.textContent;
+      let selectedIndex = rawText.indexOf(selectedText);
+
+      preText = rawText.substring(selectedIndex - contextCount, selectedIndex);
+      rawText = rawText.replace(/\s{2,}/g, ' ');
+
+
+
+      // trim the text to isolate the context to be sent to match the number of words requested in the contextCount
+      let words = rawText.split(' ');
+      words = words.filter(word => word.trim() !== '' && isNaN(word));
+
+      if (selectedIndex === -1) {
+        console.error('Selected text not found in raw text');
+        return;
+      }
+      // push [Insert Here] to the preText
+      preText = preText + '[Insert Here]';
+
+      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+        "model": "gpt-3.5-turbo-1106",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a copywriting assistant."
+          },
+          {
+            "role": "system",
+            "content": detailedPrompt
+          },
+          {
+            "role": "user",
+            "content": preText
+          },
+        ],
+        "max_tokens": wordCount < 1 ? 256 : wordCount * 2,
+        "temperature": 1,
+        "top_p": 1,
+        "n": 1,
+        "stream": false,
+        "logprobs": null,
+        "stop": "\n"
+      }, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const openaiText = response.data.choices[0].message.content;
+
+
+      // Update the selected component with the OpenAI text
+      component.replaceWith(`<div>${openaiText}</div>`);
+      component.setId(Math.random().toString(36).substring(7));
+      component.view.render();
+
+    } catch (error) {
+      console.error('Error getting text from OpenAI:', error);
+    }
+  });
+
+
   editor.Commands.add('get-openai-text', {
     run: async (editor, sender) => {
       sender && sender.set('active', false); // Deactivate the button
 
-      try {
-        let component = editor.getSelected();
-        if (!component || !component.is('text')) {
-          console.error('No text component selected.');
-          return;
-        }
-
-        console.log('Selected component:', component.getInnerHTML());
-
-        // Check if the selected component is a text block
-        if (component.get('type') !== 'text') {
-          console.error('Selected component is not a text block');
-          return;
-        }
-
-        const selectedText = component.getInnerHTML();
-        console.log('Selected text:', selectedText);
-
-        // clean up the HTML to get the raw text
-        selectedText.replace(/<[^>]+>/g, '');
-
-        // remove /n from the text
-        selectedText.replace(/\n/g, '');
-
-        let html = editor.getHtml();
-        let parser = new DOMParser();
-        let doc = parser.parseFromString(html, 'text/html');
-        let rawText = doc.body.textContent;
-
-        rawText.replace(/\n/g, '');
-        rawText.replace(/<[^>]+>/g, '');
-
-        // Find the start index of the selected text
-        let selectedIndex = rawText.indexOf(selectedText);
-
-        // Extract text before the selected text
-        let preText = rawText.substring(0, selectedIndex);
-
-        // Extract text after the selected text
-        let postText = rawText.substring(selectedIndex + selectedText.length);
-
-
-
-
-        console.log('Text before selected text:', preText);
-        console.log('Text after selected text:', postText);
-
-
-        if (selectedIndex === -1) {
-          console.error('Selected text not found in raw text');
-          return;
-        }
-
-        console.log('Pre text:', preText);
-        console.log('Post text:', postText);
-
-        const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-          "model": "gpt-3.5-turbo-1106",
-          "messages": [
-            {
-              "role": "system",
-              "content": "You are a helpful assistant copywriter."
-            },
-            {
-              "role": "user",
-              "content": "Please insert the sales copy in the [Insert Here] section. Only include the sales copy for the section, do not include the messages from the text before or after. If it seems like there is already sales copy, go deeper and write more. Never stop writing. If there is lorem ipsum, delete it and write your own sales copy. Do the same with any weird text that doesn't make sense."
-              
-            },
-            {
-              "role": "user",
-              "content": "Here is the sales copy:"
-            },
-            {
-              "role": "user",
-              "content": preText
-            },
-            {
-              "role": "user",
-              "content": postText
-            }
-          ],
-          "max_tokens": 256,
-          "temperature": 1,
-          "top_p": 1,
-          "n": 1,
-          "stream": false,
-          "logprobs": null,
-          "stop": "\n"
-        }, {
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        const openaiText = response.data.choices[0].message.content;
-        console.log(openaiText);
-
-        // Update the selected component with the OpenAI text
-        component.replaceWith(`<div>${openaiText}</div>`);
-        component.setId(Math.random().toString(36).substring(7));
-        component.view.render();
-
-      } catch (error) {
-        console.error('Error getting text from OpenAI:', error);
-      }
+      // Open the prompt creation UI
+      openPromptCreationUI();
     }
   });
 
@@ -138,4 +160,54 @@ export default (editor, opts = {}) => {
     command: 'get-openai-text', // The command you've added
     attributes: { title: 'Get text from OpenAI' }
   });
+
 };
+
+
+
+
+window.onload = function () {
+  this.document.body.innerHTML += `
+  
+<!-- Add this HTML inside your GrapesJS editor page -->
+
+<div  id="prompt-creation-modal" style="display:none;">
+  <!-- close button -->
+  <div class="absolute top-0 right-0 p-4 z-10">
+    <button class="text-2xl" onclick="document.getElementById('prompt-creation-modal').style.display = 'none';">&times;</button>
+  </div>
+  <div class="flex flex-col">
+    <label for="section-type">Section Type:</label>
+    <select id="section-type">
+      <option value="header">Header</option>
+      <option value="product-description">Product Description</option>
+      <option value="testimonial">Testimonial</option>
+      <option value="feature">Feature</option>
+      <option value="benefit">Benefit</option>
+      <option value="call-to-action">Call to Action</option>
+    </select>
+  </div>
+  <div class="flex flex-col">
+    <label for="content-focus">Content Focus:</label>
+    <input type="text" id="content-focus" placeholder="e.g., features, benefits">
+  </div>
+  <div class="flex flex-col">
+    <label for="tone-style">Tone/Style:</label>
+    <input type="text" id="tone-style" placeholder="e.g., professional, friendly">
+  </div>
+  <div class="flex flex-col">
+    <label for="word-count">Word Count:</label>
+    <sub>(Optional)</sub>
+    <input class="mt-5" type="number" id="word-count" placeholder="e.g., 100">
+  </div>
+  <div class="flex flex-col">
+    <label for="context-count">Previous Text To Include:</label>
+    <sub class="text-label text-red-500">Required</sub>
+    <input class="mt-5" type="number" id="context-count" placeholder="e.g., 1">
+  <div class="mt-6">
+    <button class="rounded-md bg-blue-500 text-white px-4 py-2" id="generate-text-btn">Generate Text</button>
+  </div>
+</div>
+`;
+
+}
