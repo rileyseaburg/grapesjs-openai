@@ -92,9 +92,14 @@ export default (editor, opts = {}) => {
 
       const openaiText = response.data.choices[0].message.content;
 
+      let classes = component.getClasses();
 
       // Update the selected component with the OpenAI text
-      component.replaceWith(`<div>${openaiText}</div>`);
+      component.replaceWith({
+        type: 'text',
+        content: openaiText,
+        classes: classes
+      });
       component.setId(Math.random().toString(36).substring(7));
       component.view.render();
 
