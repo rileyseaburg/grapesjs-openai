@@ -5,7 +5,6 @@ import axios from 'axios';
 
 
 export default (editor, opts = {}) => {
-  document.addEventListener('DOMContentLoaded', function () {
     // Get the Modal module from the editor
     const modal = editor.Modal;
     const modelContent = `
@@ -220,8 +219,7 @@ export default (editor, opts = {}) => {
       command: 'get-openai-text', // The command you've added
       attributes: { title: 'Get text from OpenAI' }
     });
-
-  });
+ 
 
 };
 
