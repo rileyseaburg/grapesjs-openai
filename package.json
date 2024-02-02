@@ -1,6 +1,6 @@
 {
   "name": "@evolvingriley/grapesjs-openai",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "Grapesjs Openai",
   "main": "dist/index.js",
   "repository": {
