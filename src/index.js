@@ -55,7 +55,76 @@ export default (editor, opts = {}) => {
       modal.setContent(modelContent);
       modal.open();
 
-      
+
+    }
+
+
+
+
+
+    var wordCount = 0;
+    var contextCount = 0;
+    const options = {
+      ...{
+
+        // default options
+      }, ...opts
+    };
+
+    const apiKey = options.apiKey;
+
+    // Add components
+    loadComponents(editor, options);
+    // Add blocks
+    loadBlocks(editor, options);
+
+
+
+
+    // This function will open the prompt creation UI
+    function openPromptCreationUI() {
+      openModal();
+    }
+
+    // Function to construct a detailed prompt based on user input
+    function constructDetailedPromptBasedOnUserInput() {
+      const sectionType = document.getElementById('section-type').value;
+      const contentFocus = document.getElementById('content-focus').value;
+      const toneStyle = document.getElementById('tone-style').value;
+      wordCount = document.getElementById('word-count').value;
+      contextCount = document.getElementById('context-count').value;
+
+      let prompt = "";
+      if (wordCount < 1) {
+        prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone.`;
+      } else {
+        prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone. The text should be around ${wordCount} words long.`;
+      }
+
+      return prompt;
+
+    }
+
+    editor.Commands.add('get-openai-text', {
+      run: async (editor, sender) => {
+        sender && sender.set('active', false); // Deactivate the button
+
+        // Open the prompt creation UI
+        openPromptCreationUI();
+      }
+    });
+
+    editor.Panels.addButton('options', {
+      id: 'openai-button',
+      className: 'fa fa-rocket',
+      command: 'get-openai-text', // The command you've added
+      attributes: { title: 'Get text from OpenAI' }
+    });
+ 
+
+    // Add the event listener after the modal is opened
+editor.on('modal:open', function() {
+        
     // Event listener for the Generate Text button
     document.getElementById('generate-text-btn').addEventListener('click', async function () {
       const detailedPrompt = constructDetailedPromptBasedOnUserInput();
@@ -157,71 +226,7 @@ export default (editor, opts = {}) => {
     });
 
 
-    }
-
-
-
-
-
-    var wordCount = 0;
-    var contextCount = 0;
-    const options = {
-      ...{
-
-        // default options
-      }, ...opts
-    };
-
-    const apiKey = options.apiKey;
-
-    // Add components
-    loadComponents(editor, options);
-    // Add blocks
-    loadBlocks(editor, options);
-
-
-
-
-    // This function will open the prompt creation UI
-    function openPromptCreationUI() {
-      openModal();
-    }
-
-    // Function to construct a detailed prompt based on user input
-    function constructDetailedPromptBasedOnUserInput() {
-      const sectionType = document.getElementById('section-type').value;
-      const contentFocus = document.getElementById('content-focus').value;
-      const toneStyle = document.getElementById('tone-style').value;
-      wordCount = document.getElementById('word-count').value;
-      contextCount = document.getElementById('context-count').value;
-
-      let prompt = "";
-      if (wordCount < 1) {
-        prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone.`;
-      } else {
-        prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone. The text should be around ${wordCount} words long.`;
-      }
-
-      return prompt;
-
-    }
-
-    editor.Commands.add('get-openai-text', {
-      run: async (editor, sender) => {
-        sender && sender.set('active', false); // Deactivate the button
-
-        // Open the prompt creation UI
-        openPromptCreationUI();
-      }
-    });
-
-    editor.Panels.addButton('options', {
-      id: 'openai-button',
-      className: 'fa fa-rocket',
-      command: 'get-openai-text', // The command you've added
-      attributes: { title: 'Get text from OpenAI' }
-    });
- 
+});
 
 };
 
