@@ -2,8 +2,10 @@ import loadComponents from './components';
 import loadBlocks from './blocks';
 import axios from 'axios';
 
+
+
 export default (editor, opts = {}) => {
-  editor.on('load', () => {
+  document.addEventListener('DOMContentLoaded', function() {
 
     this.document.body.innerHTML += `
   
