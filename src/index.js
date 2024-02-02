@@ -5,7 +5,7 @@ import axios from 'axios';
 
 
 export default (editor, opts = {}) => {
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
 
     this.document.body.innerHTML += `
   
@@ -50,165 +50,169 @@ export default (editor, opts = {}) => {
 </div>
 `;
 
-  });
 
 
-  var wordCount = 0;
-  var contextCount = 0;
-  const options = {
-    ...{
+    // Event listener for the Generate Text button
+    document.getElementById('generate-text-btn').addEventListener('click', async function () {
+      const detailedPrompt = constructDetailedPromptBasedOnUserInput();
+      // Close the modal
+      document.getElementById('prompt-creation-modal').style.display = 'none';
 
-      // default options
-    }, ...opts
-  };
+      // Proceed with the API call
+      // ... [Rest of your API call logic here]
 
-  const apiKey = options.apiKey;
+      // Assume 'openaiText' is the text received from OpenAI
+      // Show this text to the user for preview and editing
+      // Then update the component with the final text
+      try {
+        let component = editor.getSelected();
 
-  // Add components
-  loadComponents(editor, options);
-  // Add blocks
-  loadBlocks(editor, options);
-
-
-
-
-  // This function will open the prompt creation UI
-  function openPromptCreationUI() {
-    document.getElementById('prompt-creation-modal').style.display = 'block';
-  }
-
-  // Function to construct a detailed prompt based on user input
-  function constructDetailedPromptBasedOnUserInput() {
-    const sectionType = document.getElementById('section-type').value;
-    const contentFocus = document.getElementById('content-focus').value;
-    const toneStyle = document.getElementById('tone-style').value;
-    wordCount = document.getElementById('word-count').value;
-    contextCount = document.getElementById('context-count').value;
-
-    let prompt = "";
-    if (wordCount < 1) {
-      prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone.`;
-    } else {
-      prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone. The text should be around ${wordCount} words long.`;
-    }
-
-    return prompt;
-
-  }
-
-  // Event listener for the Generate Text button
-  document.getElementById('generate-text-btn').addEventListener('click', async function () {
-    const detailedPrompt = constructDetailedPromptBasedOnUserInput();
-    // Close the modal
-    document.getElementById('prompt-creation-modal').style.display = 'none';
-
-    // Proceed with the API call
-    // ... [Rest of your API call logic here]
-
-    // Assume 'openaiText' is the text received from OpenAI
-    // Show this text to the user for preview and editing
-    // Then update the component with the final text
-    try {
-      let component = editor.getSelected();
-
-      if (!component || !component.is('text')) {
-        console.error('No text component selected.');
-        return;
-      }
-      // Check if the selected component is a text block
-      if (component.get('type') !== 'text') {
-        console.error('Selected component is not a text block');
-        return;
-      }
-
-      const selectedText = component.getInnerHTML();
-
-      // clean up the HTML to get the raw text
-      selectedText.replace(/<[^>]+>/g, '');
-
-      // remove /n from the text
-      selectedText.replace(/\n/g, '');
-      let preText = '';
-      let html = editor.getHtml();
-      let parser = new DOMParser();
-      let doc = parser.parseFromString(html, 'text/html');
-      let rawText = doc.body.textContent;
-      let selectedIndex = rawText.indexOf(selectedText);
-
-      preText = rawText.substring(selectedIndex - contextCount, selectedIndex);
-      rawText = rawText.replace(/\s{2,}/g, ' ');
-
-
-
-      // trim the text to isolate the context to be sent to match the number of words requested in the contextCount
-      let words = rawText.split(' ');
-      words = words.filter(word => word.trim() !== '' && isNaN(word));
-
-      if (selectedIndex === -1) {
-        console.error('Selected text not found in raw text');
-        return;
-      }
-      // push [Insert Here] to the preText
-      preText = preText + '[Insert Here]';
-
-      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-        "model": "gpt-3.5-turbo-1106",
-        "messages": [
-          {
-            "role": "system",
-            "content": "You are a copywriting assistant."
-          },
-          {
-            "role": "system",
-            "content": detailedPrompt
-          },
-          {
-            "role": "user",
-            "content": preText
-          },
-        ],
-        "max_tokens": wordCount < 1 ? 256 : wordCount * 2,
-        "temperature": 1,
-        "top_p": 1,
-        "n": 1,
-        "stream": false,
-        "logprobs": null,
-        "stop": "\n"
-      }, {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
+        if (!component || !component.is('text')) {
+          console.error('No text component selected.');
+          return;
         }
-      });
+        // Check if the selected component is a text block
+        if (component.get('type') !== 'text') {
+          console.error('Selected component is not a text block');
+          return;
+        }
 
-      const openaiText = response.data.choices[0].message.content;
+        const selectedText = component.getInnerHTML();
+
+        // clean up the HTML to get the raw text
+        selectedText.replace(/<[^>]+>/g, '');
+
+        // remove /n from the text
+        selectedText.replace(/\n/g, '');
+        let preText = '';
+        let html = editor.getHtml();
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(html, 'text/html');
+        let rawText = doc.body.textContent;
+        let selectedIndex = rawText.indexOf(selectedText);
+
+        preText = rawText.substring(selectedIndex - contextCount, selectedIndex);
+        rawText = rawText.replace(/\s{2,}/g, ' ');
 
 
-      // Update the selected component with the OpenAI text
-      component.replaceWith(`<div>${openaiText}</div>`);
-      component.setId(Math.random().toString(36).substring(7));
-      component.view.render();
 
-    } catch (error) {
-      console.error('Error getting text from OpenAI:', error);
+        // trim the text to isolate the context to be sent to match the number of words requested in the contextCount
+        let words = rawText.split(' ');
+        words = words.filter(word => word.trim() !== '' && isNaN(word));
+
+        if (selectedIndex === -1) {
+          console.error('Selected text not found in raw text');
+          return;
+        }
+        // push [Insert Here] to the preText
+        preText = preText + '[Insert Here]';
+
+        const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+          "model": "gpt-3.5-turbo-1106",
+          "messages": [
+            {
+              "role": "system",
+              "content": "You are a copywriting assistant."
+            },
+            {
+              "role": "system",
+              "content": detailedPrompt
+            },
+            {
+              "role": "user",
+              "content": preText
+            },
+          ],
+          "max_tokens": wordCount < 1 ? 256 : wordCount * 2,
+          "temperature": 1,
+          "top_p": 1,
+          "n": 1,
+          "stream": false,
+          "logprobs": null,
+          "stop": "\n"
+        }, {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const openaiText = response.data.choices[0].message.content;
+
+
+        // Update the selected component with the OpenAI text
+        component.replaceWith(`<div>${openaiText}</div>`);
+        component.setId(Math.random().toString(36).substring(7));
+        component.view.render();
+
+      } catch (error) {
+        console.error('Error getting text from OpenAI:', error);
+      }
+    });
+
+
+
+
+
+    var wordCount = 0;
+    var contextCount = 0;
+    const options = {
+      ...{
+
+        // default options
+      }, ...opts
+    };
+
+    const apiKey = options.apiKey;
+
+    // Add components
+    loadComponents(editor, options);
+    // Add blocks
+    loadBlocks(editor, options);
+
+
+
+
+    // This function will open the prompt creation UI
+    function openPromptCreationUI() {
+      document.getElementById('prompt-creation-modal').style.display = 'block';
     }
-  });
 
+    // Function to construct a detailed prompt based on user input
+    function constructDetailedPromptBasedOnUserInput() {
+      const sectionType = document.getElementById('section-type').value;
+      const contentFocus = document.getElementById('content-focus').value;
+      const toneStyle = document.getElementById('tone-style').value;
+      wordCount = document.getElementById('word-count').value;
+      contextCount = document.getElementById('context-count').value;
 
-  editor.Commands.add('get-openai-text', {
-    run: async (editor, sender) => {
-      sender && sender.set('active', false); // Deactivate the button
+      let prompt = "";
+      if (wordCount < 1) {
+        prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone.`;
+      } else {
+        prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone. The text should be around ${wordCount} words long.`;
+      }
 
-      // Open the prompt creation UI
-      openPromptCreationUI();
+      return prompt;
+
     }
-  });
 
-  editor.Panels.addButton('options', {
-    id: 'openai-button',
-    className: 'fa fa-rocket',
-    command: 'get-openai-text', // The command you've added
-    attributes: { title: 'Get text from OpenAI' }
+    editor.Commands.add('get-openai-text', {
+      run: async (editor, sender) => {
+        sender && sender.set('active', false); // Deactivate the button
+
+        // Open the prompt creation UI
+        openPromptCreationUI();
+      }
+    });
+
+    editor.Panels.addButton('options', {
+      id: 'openai-button',
+      className: 'fa fa-rocket',
+      command: 'get-openai-text', // The command you've added
+      attributes: { title: 'Get text from OpenAI' }
+    });
+
   });
 
 };
