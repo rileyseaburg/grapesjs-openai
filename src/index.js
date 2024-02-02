@@ -6,9 +6,9 @@ import axios from 'axios';
 
 export default (editor, opts = {}) => {
   document.addEventListener('DOMContentLoaded', function () {
-// Get the Modal module from the editor
-const modal = editor.Modal;
-    modal.setContent(`
+    // Get the Modal module from the editor
+    const modal = editor.Modal;
+    const modelContent = `
   
 <!-- Add this HTML inside your GrapesJS editor page -->
 
@@ -49,15 +49,19 @@ const modal = editor.Modal;
     <button class="rounded-md bg-blue-500 text-white px-4 py-2" id="generate-text-btn">Generate Text</button>
   </div>
 </div>
-`);
+`
 
+
+    const openModal = () => {
+      modal.setContent(modelContent);
+      modal.open();
+    }
 
 
     // Event listener for the Generate Text button
     document.getElementById('generate-text-btn').addEventListener('click', async function () {
       const detailedPrompt = constructDetailedPromptBasedOnUserInput();
       // Close the modal
-      document.getElementById('prompt-creation-modal').style.display = 'none';
 
       // Proceed with the API call
       // ... [Rest of your API call logic here]
@@ -146,6 +150,9 @@ const modal = editor.Modal;
         component.setId(Math.random().toString(36).substring(7));
         component.view.render();
 
+        // close the modal
+        modal.close();
+
       } catch (error) {
         console.error('Error getting text from OpenAI:', error);
       }
@@ -176,7 +183,7 @@ const modal = editor.Modal;
 
     // This function will open the prompt creation UI
     function openPromptCreationUI() {
-      modal.open();
+      openModal();
     }
 
     // Function to construct a detailed prompt based on user input
