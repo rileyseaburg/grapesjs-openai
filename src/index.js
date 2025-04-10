@@ -1,8 +1,7 @@
 import loadComponents from './components';
 import loadBlocks from './blocks';
 import axios from 'axios';
-
-
+import { v4 as uuidv4 } from 'uuid';
 
 export default (editor, opts = {}) => {
   window.generateText = async () => { 
@@ -100,7 +99,7 @@ export default (editor, opts = {}) => {
         content: openaiText,
         classes: classes
       });
-      component.setId(Math.random().toString(36).substring(7));
+      component.setId(uuidv4());
       component.view.render();
 
       // close the modal
@@ -113,6 +112,104 @@ export default (editor, opts = {}) => {
 
   // Get the Modal module from the editor
   const modal = editor.Modal;
+
+  window.generateHTML = async () => {
+    const detailedPrompt = constructDetailedPromptBasedOnUserInput();
+    try {
+      let component = editor.getSelected();
+
+      if (!component || !component.is('html')) {
+        console.error('No HTML component selected.');
+        return;
+      }
+
+      const selectedHTML = component.getInnerHTML();
+
+      let preHTML = '';
+      let html = editor.getHtml();
+      let parser = new DOMParser();
+      let doc = parser.parseFromString(html, 'text/html');
+      let rawHTML = doc.body.innerHTML;
+      let selectedIndex = rawHTML.indexOf(selectedHTML);
+
+      if (selectedIndex === -1) {
+        console.error('Selected HTML not found in raw HTML');
+        return;
+      }
+
+      if (selectedIndex - contextCount < 0) {
+        console.error('Context count exceeds the bounds of the raw HTML');
+        return;
+      }
+
+      preHTML = rawHTML.substring(selectedIndex - contextCount, selectedIndex);
+      rawHTML = rawHTML.replace(/\s{2,}/g, ' ');
+      preHTML = preHTML + '[Insert Here]';
+
+      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+        "model": "gpt-3.5-turbo-1106",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a web development assistant."
+          },
+          {
+            "role": "system",
+            "content": detailedPrompt
+          },
+          {
+            "role": "user",
+            "content": preHTML
+          },
+        ],
+        "max_tokens": wordCount < 1 ? 256 : wordCount * 2,
+        "temperature": 1,
+        "top_p": 1,
+        "n": 1,
+        "stream": false,
+        "logprobs": null,
+        "stop": "\n"
+      }, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const openaiHTML = response.data.choices[0].message.content;
+
+      let classes = component.getClasses();
+
+      let newComponent = component.replaceWith({
+        type: 'html',
+        content: openaiHTML,
+        classes: classes
+      });
+      newComponent.setId(uuidv4());
+      newComponent.view.render();
+      modal.close();
+
+    } catch (error) {
+      console.error('Error getting HTML from OpenAI:', error);
+    }
+  }
+
+  window.rerenderHTML = () => {
+    try {
+      let component = editor.getSelected();
+
+      if (!component || !component.is('html')) {
+        console.error('No HTML component selected.');
+        return;
+      }
+
+      component.view.render();
+
+    } catch (error) {
+      console.error('Error rerendering HTML:', error);
+    }
+  }
+
   const modelContent = `
   
 <!-- Add this HTML inside your GrapesJS editor page -->
@@ -158,13 +255,10 @@ export default (editor, opts = {}) => {
 </div>
 `
 
-
   const openModal = () => {
     modal.setContent(modelContent);
     modal.open();
   }
-
-
 
   var wordCount = 0;
   var contextCount = 0;
@@ -181,9 +275,6 @@ export default (editor, opts = {}) => {
   loadComponents(editor, options);
   // Add blocks
   loadBlocks(editor, options);
-
-
-
 
   // This function will open the prompt creation UI
   function openPromptCreationUI() {
@@ -221,6 +312,21 @@ export default (editor, opts = {}) => {
     className: 'fa fa-rocket',
     command: 'get-openai-text', // The command you've added
     attributes: { title: 'Get text from OpenAI' }
+  });
+
+  editor.Commands.add('get-openai-html', {
+    run: async (editor, sender) => {
+      sender && sender.set('active', false); // Deactivate the button
+
+      // Open the prompt creation UI
+      openModal();
+    }
+  });
+  editor.Panels.addButton('options', {
+    id: 'openai-html-button',
+    className: 'fa fa-code',
+    command: 'get-openai-html', // The command you've added
+    attributes: { title: 'Get HTML from OpenAI' }
   });
 
 }
