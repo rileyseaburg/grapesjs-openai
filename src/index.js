@@ -131,14 +131,18 @@ export default (editor, opts = {}) => {
       let rawHTML = doc.body.innerHTML;
       let selectedIndex = rawHTML.indexOf(selectedHTML);
 
-      preHTML = rawHTML.substring(selectedIndex - contextCount, selectedIndex);
-      rawHTML = rawHTML.replace(/\s{2,}/g, ' ');
-
       if (selectedIndex === -1) {
         console.error('Selected HTML not found in raw HTML');
         return;
       }
 
+      if (selectedIndex - contextCount < 0) {
+        console.error('Context count exceeds the bounds of the raw HTML');
+        return;
+      }
+
+      preHTML = rawHTML.substring(selectedIndex - contextCount, selectedIndex);
+      rawHTML = rawHTML.replace(/\s{2,}/g, ' ');
       preHTML = preHTML + '[Insert Here]';
 
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
