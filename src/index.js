@@ -179,14 +179,13 @@ export default (editor, opts = {}) => {
 
       let classes = component.getClasses();
 
-      component.replaceWith({
+      let newComponent = component.replaceWith({
         type: 'html',
         content: openaiHTML,
         classes: classes
       });
-      component.setId(Math.random().toString(36).substring(7));
-      component.view.render();
-
+      newComponent.setId(Math.random().toString(36).substring(7));
+      newComponent.view.render();
       modal.close();
 
     } catch (error) {
