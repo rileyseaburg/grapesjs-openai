@@ -2,8 +2,6 @@ import loadComponents from './components';
 import loadBlocks from './blocks';
 import axios from 'axios';
 
-
-
 export default (editor, opts = {}) => {
   window.generateText = async () => { 
     // when generate text button is loaded in the dom
@@ -111,6 +109,9 @@ export default (editor, opts = {}) => {
     }
   }
 
+  // Get the Modal module from the editor
+  const modal = editor.Modal;
+
   window.generateHTML = async () => {
     const detailedPrompt = constructDetailedPromptBasedOnUserInput();
     try {
@@ -205,8 +206,6 @@ export default (editor, opts = {}) => {
     }
   }
 
-  // Get the Modal module from the editor
-  const modal = editor.Modal;
   const modelContent = `
   
 <!-- Add this HTML inside your GrapesJS editor page -->
@@ -252,13 +251,10 @@ export default (editor, opts = {}) => {
 </div>
 `
 
-
   const openModal = () => {
     modal.setContent(modelContent);
     modal.open();
   }
-
-
 
   var wordCount = 0;
   var contextCount = 0;
@@ -275,9 +271,6 @@ export default (editor, opts = {}) => {
   loadComponents(editor, options);
   // Add blocks
   loadBlocks(editor, options);
-
-
-
 
   // This function will open the prompt creation UI
   function openPromptCreationUI() {
