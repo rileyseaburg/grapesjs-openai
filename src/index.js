@@ -1,6 +1,7 @@
 import loadComponents from './components';
 import loadBlocks from './blocks';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 export default (editor, opts = {}) => {
   window.generateText = async () => { 
@@ -98,7 +99,7 @@ export default (editor, opts = {}) => {
         content: openaiText,
         classes: classes
       });
-      component.setId(Math.random().toString(36).substring(7));
+      component.setId(uuidv4());
       component.view.render();
 
       // close the modal
@@ -184,7 +185,7 @@ export default (editor, opts = {}) => {
         content: openaiHTML,
         classes: classes
       });
-      newComponent.setId(Math.random().toString(36).substring(7));
+      newComponent.setId(uuidv4());
       newComponent.view.render();
       modal.close();
 
