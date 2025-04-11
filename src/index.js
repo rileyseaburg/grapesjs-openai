@@ -6,25 +6,39 @@ import { v4 as uuidv4 } from 'uuid';
 export default (editor, opts = {}) => {
   // Function to construct a detailed prompt for HTML generation based on landing page inputs
   function constructHtmlPromptBasedOnUserInput() {
-      const pageGoal = document.getElementById('html-page-goal').value;
-      const targetAudience = document.getElementById('html-target-audience').value;
-      const keyMessage = document.getElementById('html-key-message').value;
-      const cta = document.getElementById('html-cta').value;
-      const desiredElements = document.getElementById('html-desired-elements').value;
-      const toneStyle = document.getElementById('html-tone-style').value;
-      const stylingPreference = document.getElementById('html-styling-preference').value;
+      const modalContainer = document.getElementById('html-prompt-creation-modal');
+      const currentMode = modalContainer ? modalContainer.getAttribute('data-input-mode') : 'plain'; // Default to plain if container not found
+      let prompt = {};
   
-      // Construct a structured JSON prompt
-      const prompt = {
-        goal: pageGoal || 'Not specified',
-        targetAudience: targetAudience || 'Not specified',
-        keyMessage: keyMessage || 'Not specified',
-        desiredElements: desiredElements || 'Not specified',
-        primaryCTA: cta || null,
-        toneStyle: toneStyle || 'Default',
-        stylingPreference: stylingPreference || 'Clean HTML with minimal inline styles',
-        instructions: "Please provide only the raw HTML code for this section, suitable for embedding directly."
-      };
+      if (currentMode === 'plain') {
+        // Use plain language description
+        const plainDescription = document.getElementById('html-plain-description').value.trim();
+        prompt = {
+          description: plainDescription || 'A simple hero section.', // Add a default if empty
+          stylingPreference: document.getElementById('html-styling-preference').value || 'Tailwind CSS',
+          instructions: "Generate HTML based on the description. Respond ONLY with JSON containing the HTML under 'html_content'."
+        };
+      } else {
+        // Use structured fields
+        const pageGoal = document.getElementById('html-page-goal').value;
+        const targetAudience = document.getElementById('html-target-audience').value;
+        const keyMessage = document.getElementById('html-key-message').value;
+        const cta = document.getElementById('html-cta').value;
+        const desiredElements = document.getElementById('html-desired-elements').value;
+        const toneStyle = document.getElementById('html-tone-style').value;
+        const stylingPreference = document.getElementById('html-styling-preference').value;
+  
+        prompt = {
+          goal: pageGoal || 'Not specified',
+          targetAudience: targetAudience || 'Not specified',
+          keyMessage: keyMessage || 'Not specified',
+          desiredElements: desiredElements || 'Not specified',
+          primaryCTA: cta || null,
+          toneStyle: toneStyle || 'Default',
+          stylingPreference: stylingPreference || 'Tailwind CSS',
+          instructions: "Generate HTML based on these specifications. Respond ONLY with JSON containing the HTML under 'html_content'."
+        };
+      }
   
       return JSON.stringify(prompt, null, 2);
     }
@@ -161,11 +175,18 @@ export default (editor, opts = {}) => {
   // [Removed incorrect event delegation code]
 
   async function generateHTML() {
-    const detailedPrompt = constructHtmlPromptBasedOnUserInput();
-    let response = null;
-    let component = null;
-    try {
-      component = editor.getSelected();
+      const detailedPrompt = constructHtmlPromptBasedOnUserInput();
+      let response = null;
+      let component = null;
+      const spinner = document.getElementById('html-spinner');
+      const generateBtn = document.getElementById('generate-html-btn');
+  
+      try {
+        // Show spinner, disable button
+        if (spinner) spinner.style.display = 'inline-block';
+        if (generateBtn) generateBtn.disabled = true;
+  
+        component = editor.getSelected();
 
 
       // Removed obsolete preHTML context calculation logic
@@ -265,13 +286,13 @@ export default (editor, opts = {}) => {
       // }
       // No need to manually set ID or render, addComponents handles it.
       modal.close();
-
-    } catch (error) {
-      console.error('Error in generateHTML:', {
-        error: error.message,
-        response: response?.data,
-        component: component?.getAttributes()
-      });
+      
+          } catch (error) {
+            console.error('Error in generateHTML:', {
+              error: error.message,
+              // Avoid logging potentially large response object on error
+                componentId: component?.getId() // Log component ID instead of full attributes
+              });
       editor.log(`Failed to generate HTML: ${error.message}`, { level: 'error' });
     }
   }
@@ -354,7 +375,21 @@ export default (editor, opts = {}) => {
     <div class="absolute top-0 right-0 p-4 z-10">
       <button class="text-2xl" onclick="editor.Modal.close()">&times;</button>
     </div>
-    <h2 class="text-xl font-bold mb-4">Generate Landing Page HTML</h2>
+    <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold">Generate Landing Page HTML</h2>
+          <button id="toggle-input-mode" class="text-sm text-blue-600 hover:underline">Switch to Structured Input</button>
+        </div>
+    
+        <div id="plain-language-section">
+          <div class="flex flex-col mb-3">
+            <label for="html-plain-description" class="mb-1 font-semibold">Describe what you want (Plain Language):</label>
+            <textarea id="html-plain-description" rows="4" placeholder="e.g., A hero section with a large image on the left, headline, subheadline, and a 'Learn More' button on the right. Use a professional tone." class="border p-1 rounded"></textarea>
+          </div>
+        </div>
+    
+        <div id="structured-fields-section" style="display: none;">
+          <hr class="my-4">
+          <p class="text-center text-gray-600 mb-3">Fill out the details:</p>
 
     <div class="flex flex-col mb-3">
       <label for="html-page-goal" class="mb-1 font-semibold">Page/Section Goal:</label>
@@ -402,7 +437,9 @@ export default (editor, opts = {}) => {
         <option value="o1-mini">O1 Mini</option>
       </select>
     </div>
+    </div> <!-- Close structured-fields-section -->
 
+      <div id="html-spinner" style="display: none;" class="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500 mr-3"></div>
     <div class="mt-6 text-right">
       <button
         class="rounded-md bg-green-600 hover:bg-green-700 text-white px-5 py-2" id="generate-html-btn">Generate HTML</button>
@@ -441,11 +478,46 @@ export default (editor, opts = {}) => {
         return;
       }
       // Attach a delegated listener to the content element
+      // Attach listener for the Generate HTML button
       modalContentEl.addEventListener('click', (event) => {
         if (event.target && event.target.id === 'generate-html-btn') {
           generateHTML();
         }
       });
+      
+      // Set up the input mode toggle functionality
+      const toggleBtn = modalContentEl.querySelector('#toggle-input-mode');
+      const plainSection = modalContentEl.querySelector('#plain-language-section');
+      const structuredSection = modalContentEl.querySelector('#structured-fields-section');
+      const modalContainer = modalContentEl.querySelector('#html-prompt-creation-modal'); // Assuming the main div has this ID
+      
+      if (toggleBtn && plainSection && structuredSection && modalContainer) {
+        // Set initial state
+        modalContainer.setAttribute('data-input-mode', 'plain');
+        structuredSection.style.display = 'none';
+        plainSection.style.display = 'block';
+        toggleBtn.textContent = 'Switch to Structured Input';
+      
+        // Add listener ONLY to the toggle button
+        toggleBtn.addEventListener('click', () => {
+          const currentMode = modalContainer.getAttribute('data-input-mode');
+          if (currentMode === 'plain') {
+            // Switch to structured
+            plainSection.style.display = 'none';
+            structuredSection.style.display = 'block';
+            toggleBtn.textContent = 'Switch to Plain Language Input';
+            modalContainer.setAttribute('data-input-mode', 'structured');
+          } else {
+            // Switch to plain
+            structuredSection.style.display = 'none';
+            plainSection.style.display = 'block';
+            toggleBtn.textContent = 'Switch to Structured Input';
+            modalContainer.setAttribute('data-input-mode', 'plain');
+          }
+        });
+      } else {
+        console.error('Could not find all elements for input mode toggle. Check IDs: #toggle-input-mode, #plain-language-section, #structured-fields-section, #html-prompt-creation-modal');
+      }
     });
 
     // Now set content and open
