@@ -4,6 +4,35 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 export default (editor, opts = {}) => {
+
+  // --- Inject CSS for Loading State ---
+  const css = editor.CssComposer;
+  css.addRules(`
+    .ai-image-loading::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1;
+      border-radius: inherit; /* Optional: match component border-radius */
+    }
+    .ai-image-loading::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 30px; height: 30px;
+      margin-top: -15px; margin-left: -15px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      animation: ai-spinner 0.8s linear infinite;
+      z-index: 2;
+    }
+    @keyframes ai-spinner {
+      to { transform: rotate(360deg); }
+    }
+  `);
+
   // Function to construct a detailed prompt for HTML generation based on landing page inputs
   function constructHtmlPromptBasedOnUserInput() {
       const modalContainer = document.getElementById('html-prompt-creation-modal');
@@ -454,6 +483,33 @@ export default (editor, opts = {}) => {
               modalContainer.setAttribute('data-input-mode', 'structured');
             } else {
               structuredSection.style.display = 'none';
+
+  // Define custom trait type for AI buttons
+  editor.TraitManager.addType('ai-button', {
+    // Expects 'command' option
+    createInput({ trait }) {
+      const el = document.createElement('div');
+      const commandId = trait.get('command');
+      const label = trait.get('label') || 'Run Command';
+      el.innerHTML = `
+        <button type="button" class="gjs-trt-button" style="width: 100%; margin-top: 10px;">
+          ${label}
+        </button>
+      `;
+      const button = el.querySelector('button');
+      // Use mousedown to trigger command, as click might be prevented by GrapesJS
+      button.addEventListener('mousedown', (e) => {
+         e.stopPropagation(); // Prevent GrapesJS from interfering
+         console.log(`AI Button Trait clicked, running command: ${commandId}`); // Debug log
+         editor.runCommand(commandId, { component: trait.target }); // Pass component context
+      });
+      return el;
+    },
+    // Prevent GrapesJS from handling value updates for this button
+    onUpdate() {},
+    onEvent() {},
+  });
+
               plainSection.style.display = 'block';
               newToggleBtn.textContent = 'Switch to Structured Input';
               modalContainer.setAttribute('data-input-mode', 'plain');
@@ -506,8 +562,8 @@ export default (editor, opts = {}) => {
       return;
     }
 
-    const prompt = component.getAttributes()['ai-prompt'] || ''; // Get from attribute
-    const size = component.getAttributes()['ai-size'] || '1024x1024'; // Get from attribute
+    const prompt = component.get('ai-prompt') || ''; // Get trait property directly
+        const size = component.get('ai-size') || '1024x1024'; // Get trait property directly
 
     if (!prompt) {
       editor.log('Please enter an image prompt in the component settings.', { level: 'warning' });
@@ -517,7 +573,7 @@ export default (editor, opts = {}) => {
     // Indicate loading state (e.g., add a class, change placeholder?)
     // Simple approach: just log
     editor.log('Generating AI image...', { level: 'info' });
-    component.addAttributes({ 'data-generating': 'true' }); // Add data attribute for styling maybe
+    component.addClass('ai-image-loading'); // Add class to trigger CSS
 
     try {
       const response = await axios.post('https://api.openai.com/v1/images/generations', {
@@ -548,7 +604,7 @@ export default (editor, opts = {}) => {
       }
       editor.log(errorMsg, { level: 'error' });
     } finally {
-       component.removeAttributes('data-generating');
+       component.removeClass('ai-image-loading'); // Remove class
     }
   }
 
