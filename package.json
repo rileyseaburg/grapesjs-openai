@@ -1,6 +1,6 @@
 {
   "name": "@evolvingriley/grapesjs-openai",
-  "version": "1.0.40",
+  "version": "1.0.41",
   "description": "Grapesjs Openai",
   "main": "dist/index.js",
   "repository": {
@@ -18,6 +18,7 @@
     "plugin"
   ],
   "devDependencies": {
+    "copy-webpack-plugin": "^13.0.0",
     "crypto-browserify": "^3.12.0",
     "grapesjs-cli": "^4.1.3",
     "os-browserify": "^0.3.0",

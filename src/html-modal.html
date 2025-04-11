@@ -1,0 +1,75 @@
+<div id="html-prompt-creation-modal" class="p-4">
+  <!-- close button -->
+  <div class="absolute top-0 right-0 p-4 z-10">
+    <button class="text-2xl" onclick="editor.Modal.close()">&times;</button>
+  </div>
+  <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Generate Landing Page HTML</h2>
+        <button id="toggle-input-mode" class="text-sm text-blue-600 hover:underline">Switch to Structured Input</button>
+      </div>
+  
+      <div id="plain-language-section">
+        <div class="flex flex-col mb-3">
+          <label for="html-plain-description" class="mb-1 font-semibold">Describe what you want (Plain Language):</label>
+          <textarea id="html-plain-description" rows="4" placeholder="e.g., A hero section with a large image on the left, headline, subheadline, and a 'Learn More' button on the right. Use a professional tone." class="border p-1 rounded"></textarea>
+        </div>
+      </div>
+  
+      <div id="structured-fields-section" style="display: none;">
+        <hr class="my-4">
+        <p class="text-center text-gray-600 mb-3">Fill out the details:</p>
+
+  <div class="flex flex-col mb-3">
+    <label for="html-page-goal" class="mb-1 font-semibold">Page/Section Goal:</label>
+    <input type="text" id="html-page-goal" placeholder="e.g., Lead capture, Product info" class="border p-1 rounded">
+  </div>
+
+  <div class="flex flex-col mb-3">
+    <label for="html-target-audience" class="mb-1 font-semibold">Target Audience:</label>
+    <input type="text" id="html-target-audience" placeholder="e.g., Developers, Marketers" class="border p-1 rounded">
+  </div>
+
+  <div class="flex flex-col mb-3">
+    <label for="html-key-message" class="mb-1 font-semibold">Key Message/Offer:</label>
+    <textarea id="html-key-message" rows="3" placeholder="Core value proposition..." class="border p-1 rounded"></textarea>
+  </div>
+
+  <div class="flex flex-col mb-3">
+    <label for="html-cta" class="mb-1 font-semibold">Call to Action (Button Text):</label>
+    <input type="text" id="html-cta" placeholder="e.g., Get Started Free" class="border p-1 rounded">
+  </div>
+
+  <div class="flex flex-col mb-3">
+    <label for="html-desired-elements" class="mb-1 font-semibold">Desired Elements (comma-separated):</label>
+    <textarea id="html-desired-elements" rows="2" placeholder="e.g., Hero image, feature list, testimonials" class="border p-1 rounded"></textarea>
+  </div>
+
+  <div class="flex flex-col mb-3">
+    <label for="html-tone-style" class="mb-1 font-semibold">Tone/Style:</label>
+    <input type="text" id="html-tone-style" placeholder="e.g., Professional, Modern, Playful" class="border p-1 rounded">
+  </div>
+
+  <div class="flex flex-col mb-3">
+    <label for="html-styling-preference" class="mb-1 font-semibold">Styling Preference:</label>
+    <input type="text" id="html-styling-preference" placeholder="e.g., Tailwind CSS, Bootstrap, Minimal CSS" class="border p-1 rounded">
+  </div>
+
+  <div class="flex flex-col mb-4">
+    <label for="html-model-select" class="mb-1 font-semibold">OpenAI Model:</label>
+    <select id="html-model-select" class="border p-1 rounded bg-white">
+      <option value="gpt-4o">GPT-4o</option>
+      <option value="gpt-4o-mini">GPT-4o Mini</option>
+      <option value="gpt-4-turbo">GPT-4 Turbo</option>
+      <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+      <option value="o1">O1</option>
+      <option value="o1-mini">O1 Mini</option>
+    </select>
+  </div>
+  </div> <!-- Close structured-fields-section -->
+
+    <div id="html-spinner" style="display: none;" class="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500 mr-3"></div>
+  <div class="mt-6 text-right">
+    <button
+      class="rounded-md bg-green-600 hover:bg-green-700 text-white px-5 py-2" id="generate-html-btn">Generate HTML</button>
+  </div>
+</div>

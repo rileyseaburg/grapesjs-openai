@@ -1,0 +1,29 @@
+<div id="image-prompt-creation-modal" class="p-4">
+  <!-- Removed comment -->
+  <div class="absolute top-0 right-0 p-4 z-10">
+    <button class="text-2xl" onclick="editor.Modal.close()">&times;</button>
+  </div>
+  <h2 class="text-xl font-bold mb-4">Generate Image with AI</h2>
+
+  <div class="flex flex-col mb-3">
+    <label for="image-prompt" class="mb-1 font-semibold">Image Prompt:</label>
+    <textarea id="image-prompt" rows="4" placeholder="Describe the image you want to create..." class="border p-1 rounded"></textarea>
+  </div>
+
+  <div class="flex flex-col mb-3">
+    <label for="image-size" class="mb-1 font-semibold">Image Size:</label>
+    <select id="image-size" class="border p-1 rounded bg-white">
+      <option value="1024x1024">1024x1024 (Default)</option>
+      <option value="1024x1792">1024x1792</option>
+      <option value="1792x1024">1792x1024</option>
+      <option value="512x512">512x512 (Older models)</option>
+      <option value="256x256">256x256 (Older models)</option>
+    </select>
+  </div>
+
+  <div class="mt-6 text-right">
+    <div id="image-spinner" style="display: none;" class="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500 mr-3"></div>
+    <button
+      class="rounded-md bg-purple-600 hover:bg-purple-700 text-white px-5 py-2" id="generate-image-btn">Generate Image</button>
+  </div>
+</div>
