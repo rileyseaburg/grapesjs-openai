@@ -45,21 +45,25 @@ export default (editor, opts = {}) => {
 
   // Function to construct a detailed prompt based on user input
   function constructDetailedPromptBasedOnUserInput() {
-    const sectionType = document.getElementById('section-type').value;
-    const contentFocus = document.getElementById('content-focus').value;
-    const toneStyle = document.getElementById('tone-style').value;
-    wordCount = document.getElementById('word-count').value;
-    contextCount = document.getElementById('context-count').value;
-
-    let prompt = "";
-    if (wordCount < 1) {
-      prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone.`;
-    } else {
-      prompt = `Generate a ${sectionType} section text focusing on ${contentFocus} with a ${toneStyle} tone. The text should be around ${wordCount} words long.`;
+      const instructions = document.getElementById('text-instructions').value.trim();
+      const toneStyle = document.getElementById('text-tone-style').value.trim();
+  
+      if (!instructions) {
+        // Handle case where instructions are empty, maybe return a default prompt or throw an error
+        // For now, let's return a generic prompt.
+        return "Generate a short paragraph of placeholder text.";
+      }
+  
+      let prompt = instructions;
+      if (toneStyle) {
+        prompt += `\n\nPlease write this in a ${toneStyle} tone.`;
+      }
+  
+      // Add instruction for the AI about its role
+      prompt = `You are a copywriting assistant. Fulfill the following request:\n\n${prompt}`;
+  
+      return prompt;
     }
-
-    return prompt;
-  }
 
 
   async function generateText() {
@@ -87,54 +91,19 @@ export default (editor, opts = {}) => {
         return;
       }
 
-      const selectedText = component.getInnerHTML();
-
-      // clean up the HTML to get the raw text
-      selectedText.replace(/<[^>]+>/g, '');
-
-      // remove /n from the text
-      selectedText.replace(/\n/g, '');
-      let preText = '';
-      let html = editor.getHtml();
-      let parser = new DOMParser();
-      let doc = parser.parseFromString(html, 'text/html');
-      let rawText = doc.body.textContent;
-      let selectedIndex = rawText.indexOf(selectedText);
-
-      preText = rawText.substring(selectedIndex - contextCount, selectedIndex);
-      rawText = rawText.replace(/\s{2,}/g, ' ');
-
-
-
-      // trim the text to isolate the context to be sent to match the number of words requested in the contextCount
-      let words = rawText.split(' ');
-      words = words.filter(word => word.trim() !== '' && isNaN(word));
-
-      if (selectedIndex === -1) {
-        console.error('Selected text not found in raw text');
-        return;
-      }
-      // push [Insert Here] to the preText
-      preText = preText + '[Insert Here]';
+      // Removed preText calculation logic as context is no longer sent
 
       const selectedModel = document.getElementById('text-model-select').value;
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
         "model": selectedModel,
         "messages": [
+          // The detailedPrompt now includes the system role instruction
           {
-            "role": "system",
-            "content": "You are a copywriting assistant."
-          },
-          {
-            "role": "system",
+            "role": "user", // Send the constructed prompt as user input
             "content": detailedPrompt
-          },
-          {
-            "role": "user",
-            "content": preText
-          },
+          }
         ],
-        "max_tokens": wordCount < 1 ? 256 : wordCount * 2,
+        // Removed max_tokens and preText message
         "temperature": 1,
         "top_p": 1,
         "n": 1,
@@ -261,22 +230,31 @@ export default (editor, opts = {}) => {
       const openaiHTML = parsedContent.html_content;
       
       // Parse and add the generated HTML string directly to the editor
-      let addOptions = {};
       if (component) {
-        // If a component is selected, insert the new HTML *below* it
-        addOptions.at = component.index() + 1;
-        // Do not remove the selected component
-      }
-      // If no component is selected, addOptions remains empty,
-      // and addComponents will add to the end by default.
+        // If a component is selected, replace it directly using replaceWith
+        try {
+          // replaceWith might return the new component(s) or the original (now removed) one depending on version/context
+          const replacedResult = component.replaceWith(openaiHTML);
+          // Basic check if replacement seemed to happen
+          if (!replacedResult) {
+               console.warn('component.replaceWith did not return a component.');
+          }
+           // Potentially select the newly added component(s) if needed, though replaceWith might handle focus
+           // const newComponents = Array.isArray(replacedResult) ? replacedResult : [replacedResult];
+           // if (newComponents.length > 0) editor.select(newComponents[0]);
       
-      // Add the HTML string; GrapesJS will parse it and create editable components
-      const addedComponents = editor.addComponents(openaiHTML, addOptions);
-      
-      if (!addedComponents || (Array.isArray(addedComponents) && addedComponents.length === 0)) {
-        // Handle cases where addComponents might return null, undefined, or empty array
-        console.error('Failed to add components from generated HTML:', openaiHTML);
-        throw new Error('Component creation failed from generated HTML.');
+        } catch (replaceError) {
+            console.error('Error replacing component:', replaceError, 'HTML:', openaiHTML);
+            // Fallback: try adding to the end if replacement fails? Or just throw?
+            throw new Error('Failed to replace component with generated HTML.');
+        }
+      } else {
+        // If no component is selected, add to the end
+        const addedComponents = editor.addComponents(openaiHTML);
+        if (!addedComponents || (Array.isArray(addedComponents) && addedComponents.length === 0)) {
+          console.error('Failed to add components from generated HTML:', openaiHTML);
+          throw new Error('Component creation failed from generated HTML.');
+        }
       }
       
       // Optional: Select the first added component if needed
@@ -323,34 +301,13 @@ export default (editor, opts = {}) => {
   <div class="absolute top-0 right-0 p-4 z-10">
     <button class="text-2xl" onclick="document.getElementById('prompt-creation-modal').style.display = 'none';">&times;</button>
   </div>
-  <div class="flex flex-col">
-    <label for="section-type">Section Type:</label>
-    <select id="section-type">
-      <option value="header">Header</option>
-      <option value="product-description">Product Description</option>
-      <option value="testimonial">Testimonial</option>
-      <option value="feature">Feature</option>
-      <option value="benefit">Benefit</option>
-      <option value="call-to-action">Call to Action</option>
-    </select>
-  </div>
-  <div class="flex flex-col">
-    <label for="content-focus">Content Focus:</label>
-    <input type="text" id="content-focus" placeholder="e.g., features, benefits">
-  </div>
-  <div class="flex flex-col">
-    <label for="tone-style">Tone/Style:</label>
-    <input type="text" id="tone-style" placeholder="e.g., professional, friendly">
-  </div>
-  <div class="flex flex-col">
-    <label for="word-count">Word Count:</label>
-    <sub>(Optional)</sub>
-    <input class="mt-5" type="number" id="word-count" placeholder="e.g., 100">
-  </div>
-  <div class="flex flex-col">
-    <label for="context-count">Previous Text To Include:</label>
-    <sub class="text-label text-red-500">Required</sub>
-    <input class="mt-5" type="number" id="context-count" placeholder="e.g., 1">
+  <div class="flex flex-col mb-3">
+      <label for="text-instructions" class="mb-1 font-semibold">Instructions:</label>
+      <textarea id="text-instructions" rows="4" placeholder="Describe the text you want to generate (e.g., 'Write a short paragraph about the benefits of using our product', 'Create a headline for a landing page about dog walking services')" class="border p-1 rounded"></textarea>
+    </div>
+    <div class="flex flex-col mb-3">
+      <label for="text-tone-style" class="mb-1 font-semibold">Tone/Style:</label>
+      <input type="text" id="text-tone-style" placeholder="e.g., professional, friendly, witty" class="border p-1 rounded">
   <div class="flex flex-col mt-4">
     <label for="text-model-select">OpenAI Model:</label>
     <select id="text-model-select">
