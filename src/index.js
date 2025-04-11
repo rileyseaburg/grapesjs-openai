@@ -645,27 +645,36 @@ export default (editor, opts = {}) => {
   // Add blocks
   loadBlocks(editor, options);
 
-  // Extend the built-in image component
-  const defaultImageType = editor.Components.getType('image');
-  editor.Components.addType('image', {
-    extend: 'image',
-    model: {
-      defaults: {
-        traits: [
-          // Keep existing traits (like alt text)
-          ...defaultImageType.model.prototype.defaults.traits,
-          // Add our custom button trait
-          {
-            type: 'button',
-            name: 'generate-image-button',
-            label: 'Generate Image with AI',
-            command: 'open-image-prompt-modal',
-            full: true, // Use full width
-          }
-        ]
+  // Extend the built-in image component *after* the editor is loaded
+    editor.on('load', () => {
+      const defaultImageType = editor.Components.getType('image');
+      if (!defaultImageType || !defaultImageType.model || !defaultImageType.model.prototype || !defaultImageType.model.prototype.defaults || !Array.isArray(defaultImageType.model.prototype.defaults.traits)) {
+          console.error("Could not properly extend the default image type. Default traits not found.");
+          // Optionally add the type without extending default traits if necessary
+          // editor.Components.addType('image', { ... });
+          return;
       }
-    }
-  });
+  
+      editor.Components.addType('image', {
+        extend: 'image',
+        model: {
+          defaults: {
+            traits: [
+              // Keep existing traits (like alt text)
+              ...defaultImageType.model.prototype.defaults.traits,
+              // Add our custom button trait
+              {
+                type: 'button',
+                name: 'generate-image-button',
+                label: 'Generate Image with AI',
+                command: 'open-image-prompt-modal',
+                full: true, // Use full width
+              }
+            ]
+          }
+        }
+      });
+    });
 
   // Command to open the image generation modal
   editor.Commands.add('open-image-prompt-modal', {
