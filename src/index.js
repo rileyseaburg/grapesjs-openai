@@ -321,32 +321,7 @@ export default (editor, opts = {}) => {
   </div>
   `;
 
-  const imageModalContent = `
-  <div id="image-prompt-creation-modal" class="p-4">
-    <div class="absolute top-0 right-0 p-4 z-10">
-      <button class="text-2xl" onclick="editor.Modal.close()">&times;</button>
-    </div>
-    <h2 class="text-xl font-bold mb-4">Generate Image with AI</h2>
-    <div class="flex flex-col mb-3">
-      <label for="image-prompt" class="mb-1 font-semibold">Image Prompt:</label>
-      <textarea id="image-prompt" rows="4" placeholder="Describe the image you want to create..." class="border p-1 rounded"></textarea>
-    </div>
-    <div class="flex flex-col mb-3">
-      <label for="image-size" class="mb-1 font-semibold">Image Size:</label>
-      <select id="image-size" class="border p-1 rounded bg-white">
-        <option value="1024x1024">1024x1024 (Default)</option>
-        <option value="1024x1792">1024x1792</option>
-        <option value="1792x1024">1792x1024</option>
-        <option value="512x512">512x512 (Older models)</option>
-        <option value="256x256">256x256 (Older models)</option>
-      </select>
-    </div>
-    <div class="mt-6 text-right">
-      <div id="image-spinner" style="display: none;" class="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500 mr-3"></div>
-      <button class="rounded-md bg-purple-600 hover:bg-purple-700 text-white px-5 py-2" id="generate-image-btn">Generate Image</button>
-    </div>
-  </div>
-  `;
+  // Removed imageModalContent definition (No longer needed)
 
   const htmlModelContent = `
 <div id="html-prompt-creation-modal" class="p-4">
@@ -416,138 +391,11 @@ export default (editor, opts = {}) => {
 `;
 
 
-  async function generateImage() {
-      console.log('generateImage function called'); // Debug log
-    const promptInput = document.getElementById('image-prompt');
-    const sizeSelect = document.getElementById('image-size');
-    const spinner = document.getElementById('image-spinner');
-    const generateBtn = document.getElementById('generate-image-btn');
-    const component = editor.getSelected(); // Should be the image component
+  // Removed generateImage function (will be part of custom component)
 
-    if (!promptInput || !sizeSelect || !component || component.get('type') !== 'image') {
-      editor.log('Error: Could not find prompt input, size select, or valid selected image component.', { level: 'error' });
-      return;
-    }
+  // Removed toggleHtmlInputMode helper function (No longer needed)
 
-    const prompt = promptInput.value.trim();
-    const size = sizeSelect.value;
-
-    if (!prompt) {
-      editor.log('Please enter an image prompt.', { level: 'warning' });
-      return;
-    }
-
-      // --- Get surrounding text context ---
-      let surroundingText = '';
-      const parent = component.parent();
-      if (parent) {
-        parent.components().forEach(sibling => {
-          // Check if sibling is a text node or has text content
-          if (sibling.get('type') === 'text' || sibling.is('textnode')) {
-            surroundingText += sibling.toHTML() + ' ';
-          } else if (sibling.components().length > 0) {
-             // Basic check for text in children of siblings (might need deeper recursion)
-             sibling.components().forEach(child => {
-                if (child.get('type') === 'text' || child.is('textnode')) {
-                    surroundingText += child.toHTML() + ' ';
-                }
-             });
-          }
-        });
-      }
-      // Basic cleaning
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = surroundingText;
-      surroundingText = tempDiv.textContent || tempDiv.innerText || '';
-      surroundingText = surroundingText.replace(/\s+/g, ' ').trim();
-      // --- End context gathering ---
-
-      // Combine prompt and context
-      const finalPrompt = surroundingText 
-        ? `${prompt}\n\n[Surrounding Text Context: ${surroundingText}]`
-        : prompt;
-
-
-    try {
-      // Show spinner, disable button
-      if (spinner) spinner.style.display = 'inline-block';
-      if (generateBtn) generateBtn.disabled = true;
-
-      // Make API call to OpenAI Image Generation endpoint
-      const response = await axios.post('https://api.openai.com/v1/images/generations', {
-        model: "dall-e-3", // Or specify another model like dall-e-2
-        prompt: finalPrompt, // Use prompt with context
-        n: 1, // Generate one image
-        size: size,
-        response_format: 'url' // Get URL directly
-      }, {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-
-  // Removed TraitManager definition from inside generateImage function's axios call
-
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response?.data?.data?.[0]?.url) {
-        console.error('Invalid response format from OpenAI Image API:', response?.data);
-        throw new Error('Invalid response format from OpenAI Image API');
-      }
-
-      const imageUrl = response.data.data[0].url;
-
-      // Update the selected image component's src
-      component.addAttributes({ src: imageUrl });
-      // Optionally update alt text too?
-      // component.addAttributes({ alt: prompt });
-
-      modal.close();
-
-    } catch (error) {
-      console.error('Error generating image with OpenAI:', error);
-      let errorMsg = 'Failed to generate image.';
-      if (error.response?.data?.error?.message) {
-        errorMsg += ` ${error.response.data.error.message}`;
-      }
-      editor.log(errorMsg, { level: 'error' });
-    } finally {
-      // Hide spinner, enable button
-      if (spinner) spinner.style.display = 'none';
-      if (generateBtn) generateBtn.disabled = false;
-    }
-  }
-
-  // Removed toggleHtmlInputMode helper function
-
-  function openImageModal() {
-      // Define the handler function once
-      const imageModalClickHandler = (event) => {
-        // Check if the click is on the generate button AND the modal is still open
-        if (event.target && event.target.id === 'generate-image-btn' && modal.isOpen()) {
-          console.log('Generate Image button clicked (delegated), calling generateImage...'); // Debug log
-          generateImage();
-        }
-      };
-  
-      // Function to remove the listener
-      const removeImageModalListener = () => {
-        document.body.removeEventListener('click', imageModalClickHandler);
-        // Also remove the listener for the modal close event itself
-        editor.off('modal:close', removeImageModalListener);
-      };
-  
-      // Add the delegated listener to the body BEFORE opening
-      document.body.addEventListener('click', imageModalClickHandler);
-  
-      // Add a listener to remove the body listener when the modal closes
-      editor.on('modal:close', removeImageModalListener);
-  
-      // Set content and open
-      modal.setContent(imageModalContent);
-      modal.open();
-      // No listener setup needed inside 'modal:open' anymore
-    }
+  // Removed openImageModal function (No longer needed)
 
   function openModal() { // Text Modal
     modal.setContent(modelContent);
@@ -612,29 +460,7 @@ export default (editor, opts = {}) => {
             }
         });
 
-  // Define custom trait type for AI buttons
-  editor.TraitManager.addType('ai-button', {
-    // Expects 'command' option
-    createInput({ trait }) {
-      const el = document.createElement('div');
-      const commandId = trait.get('command');
-      el.innerHTML = `
-        <button type="button" class="gjs-trt-button" style="width: 100%; margin-top: 10px;">
-          ${trait.get('label') || 'Run Command'}
-        </button>
-      `;
-      const button = el.querySelector('button');
-      // Use mousedown to trigger command, as click might be prevented by GrapesJS
-      button.addEventListener('mousedown', (e) => {
-         e.stopPropagation(); // Prevent GrapesJS from interfering
-         editor.runCommand(commandId);
-      });
-      return el;
-    },
-    // Prevent GrapesJS from handling value updates for this button
-    onUpdate() {},
-    onEvent() {},
-  });
+  // Removed TraitManager definition (Using custom component approach)
 
       } else console.error('Could not find elements for HTML input mode toggle.');
     });
@@ -642,20 +468,19 @@ export default (editor, opts = {}) => {
 
 
   // Removed stray closing div tags
-`
+// Removed stray backtick
 
 
-  // Removed htmlModelContent template literal (moved to src/html-modal.html)
+  // Removed htmlModelContent placeholder comment
 
-  // Removed old openImageModal definition
+  // Removed old openImageModal placeholder comment
 
-    // Removed stray closing div tags that were here
-  `
+    // Removed stray backtick and placeholder comment
 
-  // Removed old openModal definition
+  // Removed old openModal placeholder comment
 
 
-  // Removed old openHtmlModal definition
+  // Removed old openHtmlModal placeholder comment
 
   var wordCount = 0;
   var contextCount = 0;
@@ -671,47 +496,139 @@ export default (editor, opts = {}) => {
   // Add components
   loadComponents(editor, options);
   // Add blocks
-  loadBlocks(editor, options);
 
-  // Extend the built-in image component by defining a new type that inherits from it
-    const defaultImageType = editor.Components.getType('image'); // Get default type first
-    if (!defaultImageType || !defaultImageType.model || !defaultImageType.model.prototype || !defaultImageType.model.prototype.defaults || !Array.isArray(defaultImageType.model.prototype.defaults.traits)) {
-        console.error("Could not get default image type traits. Cannot add AI button.");
-    } else {
-        editor.Components.addType('image', { // Redefine 'image' type
-          extend: 'image',
-          model: {
-            defaults: {
-              // Combine default traits with our custom one
-              traits: [
-                ...defaultImageType.model.prototype.defaults.traits,
-                {
-                  type: 'ai-button', // Use the custom trait type
-                  name: 'generate-image-button',
-                  label: 'Generate Image with AI',
-                  command: 'open-image-prompt-modal',
-                  full: true,
-                }
-              ]
-            }
-          }
-        });
+  // --- Custom AI Image Component ---
+
+  // 1. Define the generation function (modified from previous generateImage)
+  async function generateAiImageForComponent(component) {
+    if (!component || component.get('type') !== 'ai-image') {
+      editor.log('No ai-image component provided.', { level: 'warning' });
+      return;
     }
-  // Removed editor.on('load') wrapper, addType should handle timing if default type exists
 
-  // Command to open the image generation modal
-  editor.Commands.add('open-image-prompt-modal', {
-    run: (editor, sender) => {
-      const selectedComponent = editor.getSelected();
-      if (!selectedComponent || selectedComponent.get('type') !== 'image') {
-        editor.log('Please select an image component first.', { level: 'warning' });
-        return;
+    const prompt = component.getAttributes()['ai-prompt'] || ''; // Get from attribute
+    const size = component.getAttributes()['ai-size'] || '1024x1024'; // Get from attribute
+
+    if (!prompt) {
+      editor.log('Please enter an image prompt in the component settings.', { level: 'warning' });
+      return;
+    }
+
+    // Indicate loading state (e.g., add a class, change placeholder?)
+    // Simple approach: just log
+    editor.log('Generating AI image...', { level: 'info' });
+    component.addAttributes({ 'data-generating': 'true' }); // Add data attribute for styling maybe
+
+    try {
+      const response = await axios.post('https://api.openai.com/v1/images/generations', {
+        model: "dall-e-3",
+        prompt: prompt,
+        n: 1,
+        size: size,
+        response_format: 'url'
+      }, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response?.data?.data?.[0]?.url) {
+        throw new Error('Invalid response format from OpenAI Image API');
       }
-      // Logic to set modal content and open will go here
-      // Need to define imageModalContent and generateImage function first
-      openImageModal(); // Placeholder for the function that will handle modal setup
+      const imageUrl = response.data.data[0].url;
+      component.addAttributes({ src: imageUrl });
+      editor.log('AI image generated successfully!', { level: 'info' });
+
+    } catch (error) {
+      console.error('Error generating AI image:', error);
+      let errorMsg = 'Failed to generate AI image.';
+      if (error.response?.data?.error?.message) {
+        errorMsg += ` ${error.response.data.error.message}`;
+      }
+      editor.log(errorMsg, { level: 'error' });
+    } finally {
+       component.removeAttributes('data-generating');
+    }
+  }
+
+  // 2. Define the new component type
+  editor.Components.addType('ai-image', {
+    extend: 'image',
+    model: {
+      defaults: {
+        // Default attributes for prompt and size
+        attributes: { 'ai-prompt': '', 'ai-size': '1024x1024' },
+        // Define traits for the settings panel
+        traits: [
+          {
+            name: 'ai-prompt',
+            label: 'AI Prompt',
+            type: 'text', // Text input for the prompt
+            changeProp: true, // Update attribute on change
+          },
+          {
+            name: 'ai-size',
+            label: 'AI Image Size',
+            type: 'select',
+            options: [
+              { value: '1024x1024', name: '1024x1024' },
+              { value: '1024x1792', name: '1024x1792' },
+              { value: '1792x1024', name: '1792x1024' },
+            ],
+            changeProp: true,
+          },
+          {
+            type: 'button',
+            name: 'generate-ai-image-button',
+            label: 'Generate Image from Prompt',
+            command: 'trigger-ai-image-generation',
+            full: true,
+          },
+          // Include default image traits AFTER custom ones
+          // Need to get default traits safely
+          ...(editor.Components.getType('image')?.model.prototype.defaults.traits || []).filter(t => t.name !== 'src') // Exclude default src trait if needed
+        ]
+      }
     }
   });
+
+  // 3. Define the command triggered by the button trait
+  editor.Commands.add('trigger-ai-image-generation', {
+    run: (editor, sender, options) => {
+      const component = options?.component || editor.getSelected(); // Get component from options or selection
+      if (component && component.get('type') === 'ai-image') {
+        generateAiImageForComponent(component);
+      } else {
+        editor.log('Please select an AI Image component.', { level: 'warning' });
+      }
+    }
+  });
+
+  // 4. Add the block for the new component
+  editor.Blocks.add('ai-image-block', {
+    label: 'AI Image',
+    category: 'AI Tools', // Or any category you prefer
+    content: { type: 'ai-image' }, // Specifies the component type to create
+    media: `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19Z" /></svg>` // Simple image icon
+  });
+
+  loadBlocks(editor, options);
+
+  // Removed image component extension placeholder comment
+  
+    // Command to open the image generation modal (Now unused, remove?)
+    // editor.Commands.add('open-image-prompt-modal', {
+    //   run: (editor, sender) => {
+    //     const selectedComponent = editor.getSelected();
+    //     if (!selectedComponent || selectedComponent.get('type') !== 'image') {
+    //       editor.log('Please select an image component first.', { level: 'warning' });
+    //       return;
+    //     }
+    //     openImageModal();
+    //   }
+    // });
+  // Removed open-image-prompt-modal command definition
 
 
   // This function will open the prompt creation UI
@@ -739,11 +656,11 @@ export default (editor, opts = {}) => {
     run: async (editor, sender) => {
       sender && sender.set('active', false); // Deactivate the button
 
-  // Removed duplicate async/fetch-based openHtmlModal and toggleHtmlInputMode definitions
 
+  // Removed placeholder comments
 
       // Open the prompt creation UI
-      openHtmlModal();
+            openHtmlModal(); // This call remains for the HTML generation button
     }
   });
   editor.Panels.addButton('options', {
