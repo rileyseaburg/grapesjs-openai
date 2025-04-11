@@ -653,27 +653,19 @@ export default (editor, opts = {}) => {
           // Optionally add the type without extending default traits if necessary
           // editor.Components.addType('image', { ... });
           return;
-      }
-  
-      editor.Components.addType('image', {
-        extend: 'image',
-        model: {
-          defaults: {
-            traits: [
-              // Keep existing traits (like alt text)
-              ...defaultImageType.model.prototype.defaults.traits,
-              // Add our custom button trait
-              {
+              }
+          
+              // Directly modify the traits of the existing image type
+              defaultImageType.model.prototype.defaults.traits.push({
                 type: 'button',
                 name: 'generate-image-button',
                 label: 'Generate Image with AI',
                 command: 'open-image-prompt-modal',
                 full: true, // Use full width
-              }
-            ]
-          }
-        }
-      });
+              });
+          
+              // Force update of components using this type? Might not be necessary.
+              // editor.Components.render();
     });
 
   // Command to open the image generation modal
