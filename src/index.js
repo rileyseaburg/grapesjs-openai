@@ -196,7 +196,7 @@ export default (editor, opts = {}) => {
       const messages = [
         {
           "role": "system",
-          "content": "You are a web development assistant. Generate HTML based on the user's specifications. Respond ONLY with a valid JSON object containing the generated HTML under a key named 'html_content'. Example: {\"html_content\": \"<div>Example HTML</div>\"}"
+          "content": "You are a web development assistant. Generate a SINGLE version of HTML based on the user's specifications. Do NOT provide multiple variations or options. Respond ONLY with a valid JSON object containing the single generated HTML under a key named 'html_content'. Example: {\"html_content\": \"<div>Example HTML</div>\"}"
         },
         {
           "role": "user",
@@ -222,7 +222,7 @@ export default (editor, opts = {}) => {
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
           "model": selectedModel,
           "messages": messages, // Use the dynamically constructed messages array
-          "max_tokens": 2048, // Set fixed max_tokens for HTML generation
+          // "max_tokens" removed to use model default
           "temperature": 1,
           "top_p": 1,
           "n": 1,
