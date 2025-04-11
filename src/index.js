@@ -171,19 +171,36 @@ export default (editor, opts = {}) => {
       // Removed obsolete preHTML context calculation logic
 
       const selectedModel = document.getElementById('html-model-select').value;
+      // Prepare messages for the API call
+      const messages = [
+        {
+          "role": "system",
+          "content": "You are a web development assistant. Generate HTML based on the user's specifications. Respond ONLY with a valid JSON object containing the generated HTML under a key named 'html_content'. Example: {\"html_content\": \"<div>Example HTML</div>\"}"
+        },
+        {
+          "role": "user",
+          "content": detailedPrompt // User specifications (already stringified JSON)
+        }
+      ];
+      
+      // Add existing component HTML as context if available
+      if (component) {
+        try {
+          const existingHtml = component.toHTML();
+          if (existingHtml) {
+            messages.push({
+              "role": "user",
+              "content": `Existing HTML context to consider (modify or replace based on other instructions):\n\`\`\`html\n${existingHtml}\n\`\`\``
+            });
+          }
+        } catch (htmlError) {
+          console.warn('Could not get HTML from selected component:', htmlError);
+        }
+      }
+      
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
           "model": selectedModel,
-          "messages": [
-            {
-              "role": "system",
-              "content": "You are a web development assistant. Generate HTML based on the user's specifications. Respond ONLY with a valid JSON object containing the generated HTML under a key named 'html_content'. Example: {\"html_content\": \"<div>Example HTML</div>\"}" // Clearer instructions + example
-            },
-            {
-              "role": "user", // Changed from system to user
-              "content": detailedPrompt // User specifications (already stringified JSON)
-            }
-            // Removed user message sending preHTML
-          ],
+          "messages": messages, // Use the dynamically constructed messages array
           "max_tokens": 2048, // Set fixed max_tokens for HTML generation
           "temperature": 1,
           "top_p": 1,
