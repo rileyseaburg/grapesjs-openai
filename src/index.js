@@ -483,6 +483,9 @@ export default (editor, opts = {}) => {
       }, {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
+
+  // Removed TraitManager definition from inside generateImage function's axios call
+
           'Content-Type': 'application/json'
         }
       });
@@ -608,6 +611,31 @@ export default (editor, opts = {}) => {
               modalContainer.setAttribute('data-input-mode', 'plain');
             }
         });
+
+  // Define custom trait type for AI buttons
+  editor.TraitManager.addType('ai-button', {
+    // Expects 'command' option
+    createInput({ trait }) {
+      const el = document.createElement('div');
+      const commandId = trait.get('command');
+      el.innerHTML = `
+        <button type="button" class="gjs-trt-button" style="width: 100%; margin-top: 10px;">
+          ${trait.get('label') || 'Run Command'}
+        </button>
+      `;
+      const button = el.querySelector('button');
+      // Use mousedown to trigger command, as click might be prevented by GrapesJS
+      button.addEventListener('mousedown', (e) => {
+         e.stopPropagation(); // Prevent GrapesJS from interfering
+         editor.runCommand(commandId);
+      });
+      return el;
+    },
+    // Prevent GrapesJS from handling value updates for this button
+    onUpdate() {},
+    onEvent() {},
+  });
+
       } else console.error('Could not find elements for HTML input mode toggle.');
     });
   }
@@ -645,28 +673,31 @@ export default (editor, opts = {}) => {
   // Add blocks
   loadBlocks(editor, options);
 
-  // Extend the built-in image component *after* the editor is loaded
-    editor.on('load', () => {
-      const defaultImageType = editor.Components.getType('image');
-      if (!defaultImageType || !defaultImageType.model || !defaultImageType.model.prototype || !defaultImageType.model.prototype.defaults || !Array.isArray(defaultImageType.model.prototype.defaults.traits)) {
-          console.error("Could not properly extend the default image type. Default traits not found.");
-          // Optionally add the type without extending default traits if necessary
-          // editor.Components.addType('image', { ... });
-          return;
-              }
-          
-              // Directly modify the traits of the existing image type
-              defaultImageType.model.prototype.defaults.traits.push({
-                type: 'button',
-                name: 'generate-image-button',
-                label: 'Generate Image with AI',
-                command: 'open-image-prompt-modal',
-                full: true, // Use full width
-              });
-          
-              // Force update of components using this type? Might not be necessary.
-              // editor.Components.render();
-    });
+  // Extend the built-in image component by defining a new type that inherits from it
+    const defaultImageType = editor.Components.getType('image'); // Get default type first
+    if (!defaultImageType || !defaultImageType.model || !defaultImageType.model.prototype || !defaultImageType.model.prototype.defaults || !Array.isArray(defaultImageType.model.prototype.defaults.traits)) {
+        console.error("Could not get default image type traits. Cannot add AI button.");
+    } else {
+        editor.Components.addType('image', { // Redefine 'image' type
+          extend: 'image',
+          model: {
+            defaults: {
+              // Combine default traits with our custom one
+              traits: [
+                ...defaultImageType.model.prototype.defaults.traits,
+                {
+                  type: 'ai-button', // Use the custom trait type
+                  name: 'generate-image-button',
+                  label: 'Generate Image with AI',
+                  command: 'open-image-prompt-modal',
+                  full: true,
+                }
+              ]
+            }
+          }
+        });
+    }
+  // Removed editor.on('load') wrapper, addType should handle timing if default type exists
 
   // Command to open the image generation modal
   editor.Commands.add('open-image-prompt-modal', {
