@@ -263,11 +263,12 @@ export default (editor, opts = {}) => {
       // Parse and add the generated HTML string directly to the editor
       let addOptions = {};
       if (component) {
-        // If replacing an existing component, get its index first
-        addOptions.at = component.index();
-        // Remove the old component
-        component.remove();
+        // If a component is selected, insert the new HTML *below* it
+        addOptions.at = component.index() + 1;
+        // Do not remove the selected component
       }
+      // If no component is selected, addOptions remains empty,
+      // and addComponents will add to the end by default.
       
       // Add the HTML string; GrapesJS will parse it and create editable components
       const addedComponents = editor.addComponents(openaiHTML, addOptions);
