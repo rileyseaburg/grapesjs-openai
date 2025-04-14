@@ -449,13 +449,14 @@ export default (editor, opts = {}) => {
       const modalContentEl = modal.getContentEl();
       if (!modalContentEl) return console.error('HTML modal content element not found.');
   
-      // Generate button listener (clone/replace)
+      // Generate button listener - simplified approach
       const generateBtn = modalContentEl.querySelector('#generate-html-btn');
       if (generateBtn) {
-        const newGenBtn = generateBtn.cloneNode(true);
-        generateBtn.parentNode.replaceChild(newGenBtn, generateBtn);
-        newGenBtn.addEventListener('click', generateHTML);
-      } else console.error('Generate HTML button not found.');
+        console.log('Generate HTML button found, attaching event listener');
+        generateBtn.addEventListener('click', generateHTML);
+      } else {
+        console.error('Generate HTML button not found in modal content');
+      }
   
       // Toggle button listener (clone/replace)
       const toggleBtn = modalContentEl.querySelector('#toggle-input-mode');
