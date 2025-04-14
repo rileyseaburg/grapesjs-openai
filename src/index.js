@@ -184,6 +184,11 @@ export default (editor, opts = {}) => {
         if (spinner) spinner.style.display = 'inline-block';
         if (generateBtn) generateBtn.disabled = true;
   
+        // Check if API key is available
+        if (!apiKey) {
+          throw new Error('OpenAI API key is missing. Please configure it in your environment variables.');
+        }
+
         component = editor.getSelected();
 
 
@@ -260,22 +265,29 @@ export default (editor, opts = {}) => {
       
       // Parse and add the generated HTML string directly to the editor
       if (component) {
-        // If a component is selected, replace it directly using replaceWith
+        // If a component is selected, first try to update its content
         try {
-          // replaceWith might return the new component(s) or the original (now removed) one depending on version/context
-          const replacedResult = component.replaceWith(openaiHTML);
-          // Basic check if replacement seemed to happen
-          if (!replacedResult) {
-               console.warn('component.replaceWith did not return a component.');
+          // For complex HTML with scripts, better to create new components and remove old one
+          const newComponents = editor.addComponents(openaiHTML);
+          if (!newComponents || (Array.isArray(newComponents) && newComponents.length === 0)) {
+            throw new Error('Failed to create new components from generated HTML');
           }
-           // Potentially select the newly added component(s) if needed, though replaceWith might handle focus
-           // const newComponents = Array.isArray(replacedResult) ? replacedResult : [replacedResult];
-           // if (newComponents.length > 0) editor.select(newComponents[0]);
-      
+          
+          // Remove the old component after successful creation
+          component.remove();
+          
+          // Select the first new component
+          if (Array.isArray(newComponents)) {
+            editor.select(newComponents[0]);
+          } else {
+            editor.select(newComponents);
+          }
         } catch (replaceError) {
-            console.error('Error replacing component:', replaceError, 'HTML:', openaiHTML);
-            // Fallback: try adding to the end if replacement fails? Or just throw?
-            throw new Error('Failed to replace component with generated HTML.');
+          console.error('Error replacing component:', replaceError, 'HTML:', openaiHTML);
+          throw new Error('Failed to replace component with generated HTML.', {
+            error: replaceError.message,
+            componentId: component.getId()
+          });
         }
       } else {
         // If no component is selected, add to the end

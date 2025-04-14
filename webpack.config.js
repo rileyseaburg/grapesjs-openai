@@ -28,7 +28,11 @@ module.exports = ({ config }) => {
       ...config.resolve.fallback,
     },
     plugins: [
-      ...config.plugins
+      ...config.plugins,
+      new (require('dotenv-webpack'))({
+        systemvars: true, // Load system environment variables
+        safe: true // Load .env.example (if exists)
+      })
     ],
   }
 }
