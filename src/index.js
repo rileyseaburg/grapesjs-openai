@@ -265,29 +265,36 @@ export default (editor, opts = {}) => {
       
       // Parse and add the generated HTML string directly to the editor
       if (component) {
-        // If a component is selected, first try to update its content
+        // If a component is selected, replace it in place
         try {
-          // For complex HTML with scripts, better to create new components and remove old one
-          const newComponents = editor.addComponents(openaiHTML);
+          const parent = component.parent();
+          if (!parent) {
+            console.error('Selected component has no parent. Cannot replace in place.');
+            throw new Error('Selected component cannot be replaced as it lacks a parent container.');
+          }
+          const index = component.index();
+          
+          // Add the new HTML at the original component's index
+          const newComponents = parent.components().add(openaiHTML, { at: index });
+          
           if (!newComponents || (Array.isArray(newComponents) && newComponents.length === 0)) {
-            throw new Error('Failed to create new components from generated HTML');
+            console.error('Failed to add new components from generated HTML at index:', index, 'HTML:', openaiHTML);
+            throw new Error('Component creation failed when trying to replace existing component.');
           }
           
-          // Remove the old component after successful creation
+          // Remove the original component *after* successfully adding the new one
           component.remove();
           
-          // Select the first new component
-          if (Array.isArray(newComponents)) {
-            editor.select(newComponents[0]);
-          } else {
-            editor.select(newComponents);
+          // Select the newly added component(s)
+          const firstNew = Array.isArray(newComponents) ? newComponents[0] : newComponents;
+          if (firstNew) {
+              editor.select(firstNew);
           }
+          
         } catch (replaceError) {
-          console.error('Error replacing component:', replaceError, 'HTML:', openaiHTML);
-          throw new Error('Failed to replace component with generated HTML.', {
-            error: replaceError.message,
-            componentId: component.getId()
-          });
+          console.error('Error replacing component in place:', replaceError, 'HTML:', openaiHTML);
+          // Add more context to the error
+          throw new Error(`Failed to replace component (ID: ${component.getId()}) with generated HTML. Error: ${replaceError.message}`);
         }
       } else {
         // If no component is selected, add to the end
