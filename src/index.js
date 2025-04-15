@@ -355,6 +355,7 @@ export default (editor, opts = {}) => {
     <div class="flex flex-col mt-4">
       <label for="text-model-select">OpenAI Model:</label>
       <select id="text-model-select">
+        <option value="gpt-4.1-2025-04-14">GPT-4.1</option>
         <option value="gpt-4o">GPT-4o</option>
         <option value="gpt-4o-mini">GPT-4o Mini</option>
         <option value="gpt-4-turbo">GPT-4 Turbo</option>
