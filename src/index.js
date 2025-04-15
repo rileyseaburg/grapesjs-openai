@@ -355,7 +355,7 @@ export default (editor, opts = {}) => {
     <div class="flex flex-col mt-4">
       <label for="text-model-select">OpenAI Model:</label>
       <select id="text-model-select">
-        <option value="gpt-4.1-2025-04-14">GPT-4.1</option>
+        <option value="gpt-4.1-2025-04-14">GPT-4.1 (2025-04-14)</option>
         <option value="gpt-4o">GPT-4o</option>
         <option value="gpt-4o-mini">GPT-4o Mini</option>
         <option value="gpt-4-turbo">GPT-4 Turbo</option>
@@ -386,6 +386,18 @@ export default (editor, opts = {}) => {
         <div class="flex flex-col mb-3">
           <label for="html-plain-description" class="mb-1 font-semibold">Describe what you want (Plain Language):</label>
           <textarea id="html-plain-description" rows="4" placeholder="e.g., A hero section..." class="border p-1 rounded"></textarea>
+        </div>
+        <div class="flex flex-col mb-4">
+          <label for="html-model-select" class="mb-1 font-semibold">OpenAI Model:</label>
+          <select id="html-model-select" class="border p-1 rounded bg-white">
+            <option value="gpt-4.1-2025-04-14">GPT-4.1 (2025-04-14)</option>
+            <option value="gpt-4o">GPT-4o</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
+            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            <option value="o1">O1</option>
+            <option value="o1-mini">O1 Mini</option>
+          </select>
         </div>
       </div>
   
@@ -419,17 +431,6 @@ export default (editor, opts = {}) => {
         <div class="flex flex-col mb-3">
           <label for="html-styling-preference" class="mb-1 font-semibold">Styling Preference:</label>
           <input type="text" id="html-styling-preference" placeholder="e.g., Tailwind CSS" class="border p-1 rounded">
-        </div>
-        <div class="flex flex-col mb-4">
-          <label for="html-model-select" class="mb-1 font-semibold">OpenAI Model:</label>
-          <select id="html-model-select" class="border p-1 rounded bg-white">
-            <option value="gpt-4o">GPT-4o</option>
-            <option value="gpt-4o-mini">GPT-4o Mini</option>
-            <option value="gpt-4-turbo">GPT-4 Turbo</option>
-            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-            <option value="o1">O1</option>
-            <option value="o1-mini">O1 Mini</option>
-          </select>
         </div>
       </div> <!-- Close structured-fields-section -->
       <div id="html-spinner" style="display: none;" class="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500 mr-3"></div>
@@ -504,6 +505,11 @@ export default (editor, opts = {}) => {
               modalContainer.setAttribute('data-input-mode', 'structured');
             } else {
               structuredSection.style.display = 'none';
+              plainSection.style.display = 'block';
+              newToggleBtn.textContent = 'Switch to Structured Input';
+              modalContainer.setAttribute('data-input-mode', 'plain');
+            }
+        });
 
   // Define custom trait type for AI buttons
   editor.TraitManager.addType('ai-button', {
@@ -531,15 +537,7 @@ export default (editor, opts = {}) => {
     onEvent() {},
   });
 
-              plainSection.style.display = 'block';
-              newToggleBtn.textContent = 'Switch to Structured Input';
-              modalContainer.setAttribute('data-input-mode', 'plain');
-            }
-        });
-
-  // Removed TraitManager definition (Using custom component approach)
-
-      } else console.error('Could not find elements for HTML input mode toggle.');
+              } else console.error('Could not find elements for HTML input mode toggle.');
     });
   }
 
