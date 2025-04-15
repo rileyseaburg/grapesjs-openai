@@ -603,6 +603,7 @@ export default (editor, opts = {}) => {
         n: 1,
         size: size,
         style: "natural",
+        quality: "hd",
         response_format: 'url'
       }, {
         headers: {
