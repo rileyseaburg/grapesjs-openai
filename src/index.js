@@ -602,6 +602,7 @@ export default (editor, opts = {}) => {
         prompt: prompt,
         n: 1,
         size: size,
+        style: "natural",
         response_format: 'url'
       }, {
         headers: {
