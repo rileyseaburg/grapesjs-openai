@@ -35,64 +35,64 @@ export default (editor, opts = {}) => {
 
   // Function to construct a detailed prompt for HTML generation based on landing page inputs
   function constructHtmlPromptBasedOnUserInput() {
-      const modalContainer = document.getElementById('html-prompt-creation-modal');
-      const currentMode = modalContainer ? modalContainer.getAttribute('data-input-mode') : 'plain'; // Default to plain if container not found
-      let prompt = {};
-  
-      if (currentMode === 'plain') {
-        // Use plain language description
-        const plainDescription = document.getElementById('html-plain-description').value.trim();
-        prompt = {
-          description: plainDescription || 'A simple hero section.', // Add a default if empty
-          stylingPreference: document.getElementById('html-styling-preference').value || 'Tailwind CSS',
-          instructions: "Generate HTML based on the description. Respond ONLY with JSON containing the HTML under 'html_content'."
-        };
-      } else {
-        // Use structured fields
-        const pageGoal = document.getElementById('html-page-goal').value;
-        const targetAudience = document.getElementById('html-target-audience').value;
-        const keyMessage = document.getElementById('html-key-message').value;
-        const cta = document.getElementById('html-cta').value;
-        const desiredElements = document.getElementById('html-desired-elements').value;
-        const toneStyle = document.getElementById('html-tone-style').value;
-        const stylingPreference = document.getElementById('html-styling-preference').value;
-  
-        prompt = {
-          goal: pageGoal || 'Not specified',
-          targetAudience: targetAudience || 'Not specified',
-          keyMessage: keyMessage || 'Not specified',
-          desiredElements: desiredElements || 'Not specified',
-          primaryCTA: cta || null,
-          toneStyle: toneStyle || 'Default',
-          stylingPreference: stylingPreference || 'Tailwind CSS',
-          instructions: "Generate HTML based on these specifications. Respond ONLY with JSON containing the HTML under 'html_content'."
-        };
-      }
-  
-      return JSON.stringify(prompt, null, 2);
+    const modalContainer = document.getElementById('html-prompt-creation-modal');
+    const currentMode = modalContainer ? modalContainer.getAttribute('data-input-mode') : 'plain'; // Default to plain if container not found
+    let prompt = {};
+
+    if (currentMode === 'plain') {
+      // Use plain language description
+      const plainDescription = document.getElementById('html-plain-description').value.trim();
+      prompt = {
+        description: plainDescription || 'A simple hero section.', // Add a default if empty
+        stylingPreference: document.getElementById('html-styling-preference').value || 'Tailwind CSS',
+        instructions: "Generate HTML based on the description. Respond ONLY with JSON containing the HTML under 'html_content'."
+      };
+    } else {
+      // Use structured fields
+      const pageGoal = document.getElementById('html-page-goal').value;
+      const targetAudience = document.getElementById('html-target-audience').value;
+      const keyMessage = document.getElementById('html-key-message').value;
+      const cta = document.getElementById('html-cta').value;
+      const desiredElements = document.getElementById('html-desired-elements').value;
+      const toneStyle = document.getElementById('html-tone-style').value;
+      const stylingPreference = document.getElementById('html-styling-preference').value;
+
+      prompt = {
+        goal: pageGoal || 'Not specified',
+        targetAudience: targetAudience || 'Not specified',
+        keyMessage: keyMessage || 'Not specified',
+        desiredElements: desiredElements || 'Not specified',
+        primaryCTA: cta || null,
+        toneStyle: toneStyle || 'Default',
+        stylingPreference: stylingPreference || 'Tailwind CSS',
+        instructions: "Generate HTML based on these specifications. Respond ONLY with JSON containing the HTML under 'html_content'."
+      };
     }
+
+    return JSON.stringify(prompt, null, 2);
+  }
 
   // Function to construct a detailed prompt based on user input
   function constructDetailedPromptBasedOnUserInput() {
-      const instructions = document.getElementById('text-instructions').value.trim();
-      const toneStyle = document.getElementById('text-tone-style').value.trim();
-  
-      if (!instructions) {
-        // Handle case where instructions are empty, maybe return a default prompt or throw an error
-        // For now, let's return a generic prompt.
-        return "Generate a short paragraph of placeholder text.";
-      }
-  
-      let prompt = instructions;
-      if (toneStyle) {
-        prompt += `\n\nPlease write this in a ${toneStyle} tone.`;
-      }
-  
-      // Add instruction for the AI about its role
-      prompt = `You are a copywriting assistant. Fulfill the following request:\n\n${prompt}`;
-  
-      return prompt;
+    const instructions = document.getElementById('text-instructions').value.trim();
+    const toneStyle = document.getElementById('text-tone-style').value.trim();
+
+    if (!instructions) {
+      // Handle case where instructions are empty, maybe return a default prompt or throw an error
+      // For now, let's return a generic prompt.
+      return "Generate a short paragraph of placeholder text.";
     }
+
+    let prompt = instructions;
+    if (toneStyle) {
+      prompt += `\n\nPlease write this in a ${toneStyle} tone.`;
+    }
+
+    // Add instruction for the AI about its role
+    prompt = `You are a copywriting assistant. Fulfill the following request:\n\n${prompt}`;
+
+    return prompt;
+  }
 
 
   async function generateText() {
@@ -173,23 +173,23 @@ export default (editor, opts = {}) => {
   // [Removed incorrect event delegation code]
 
   async function generateHTML() {
-      const detailedPrompt = constructHtmlPromptBasedOnUserInput();
-      let response = null;
-      let component = null;
-      const spinner = document.getElementById('html-spinner');
-      const generateBtn = document.getElementById('generate-html-btn');
-  
-      try {
-        // Show spinner, disable button
-        if (spinner) spinner.style.display = 'inline-block';
-        if (generateBtn) generateBtn.disabled = true;
-  
-        // Check if API key is available
-        if (!apiKey) {
-          throw new Error('OpenAI API key is missing. Please configure it in your environment variables.');
-        }
+    const detailedPrompt = constructHtmlPromptBasedOnUserInput();
+    let response = null;
+    let component = null;
+    const spinner = document.getElementById('html-spinner');
+    const generateBtn = document.getElementById('generate-html-btn');
 
-        component = editor.getSelected();
+    try {
+      // Show spinner, disable button
+      if (spinner) spinner.style.display = 'inline-block';
+      if (generateBtn) generateBtn.disabled = true;
+
+      // Check if API key is available
+      if (!apiKey) {
+        throw new Error('OpenAI API key is missing. Please configure it in your environment variables.');
+      }
+
+      component = editor.getSelected();
 
 
       // Removed obsolete preHTML context calculation logic
@@ -199,14 +199,14 @@ export default (editor, opts = {}) => {
       const messages = [
         {
           "role": "system",
-          "content": "You are a web development assistant. Generate a SINGLE version of HTML based on the user's specifications. Do NOT provide multiple variations or options. Respond ONLY with a valid JSON object containing the single generated HTML under a key named 'html_content'. Example: {\"html_content\": \"<div>Example HTML</div>\"}"
+          "content": `You are a web development assistant. Generate a SINGLE version of HTML based on the user's specifications. Do NOT provide multiple variations or options. You are required to create fully responsive components that are mobile first and responsive for all screen sizes including altra wide. You must create components taht use tailwind as the css library and they must be darkmode and light mode responsive by default. this means all components need to respond to light mode and dark mode. Respond ONLY with a valid JSON object containing the single generated HTML under a key named 'html_content'. Example: {\"html_content\": \"<div>Example HTML</div>\"}`
         },
         {
           "role": "user",
           "content": detailedPrompt // User specifications (already stringified JSON)
         }
       ];
-      
+
       // Add existing component HTML as context if available
       if (component) {
         try {
@@ -221,32 +221,32 @@ export default (editor, opts = {}) => {
           console.warn('Could not get HTML from selected component:', htmlError);
         }
       }
-      
+
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-          "model": selectedModel,
-          "messages": messages, // Use the dynamically constructed messages array
-          // "max_tokens" removed to use model default
-          "temperature": 1,
-          "top_p": 1,
-          "n": 1,
-          "stream": false, // Disable streaming
-          "logprobs": null,
-          "stop": "\n",
-          "response_format": { "type": "json_object" }
-        }, {
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-            // Removed Accept header and responseType
-          }
-        });
-      
+        "model": selectedModel,
+        "messages": messages, // Use the dynamically constructed messages array
+        // "max_tokens" removed to use model default
+        "temperature": 1,
+        "top_p": 1,
+        "n": 1,
+        "stream": false, // Disable streaming
+        "logprobs": null,
+        "stop": "\n",
+        "response_format": { "type": "json_object" }
+      }, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+          // Removed Accept header and responseType
+        }
+      });
+
       // Handle the complete JSON response directly
       if (!response?.data?.choices?.[0]?.message?.content) {
         console.error('Invalid response format from OpenAI API:', response?.data);
         throw new Error('Invalid response format from OpenAI API');
       }
-      
+
       let parsedContent;
       try {
         // The content itself should be the JSON string
@@ -255,14 +255,14 @@ export default (editor, opts = {}) => {
         console.error('Error parsing response content JSON:', e, 'Content:', response.data.choices[0].message.content);
         throw new Error('Failed to parse JSON content from OpenAI response.');
       }
-      
+
       if (!parsedContent?.html_content) {
         console.error('Parsed response content missing html_content:', parsedContent);
         throw new Error('Invalid JSON structure in response content from OpenAI API. Expected "html_content" key.');
       }
-      
+
       const openaiHTML = parsedContent.html_content;
-      
+
       // Parse and add the generated HTML string directly to the editor
       if (component) {
         // If a component is selected, replace it in place
@@ -273,24 +273,24 @@ export default (editor, opts = {}) => {
             throw new Error('Selected component cannot be replaced as it lacks a parent container.');
           }
           const index = component.index();
-          
+
           // Add the new HTML at the original component's index
           const newComponents = parent.components().add(openaiHTML, { at: index });
-          
+
           if (!newComponents || (Array.isArray(newComponents) && newComponents.length === 0)) {
             console.error('Failed to add new components from generated HTML at index:', index, 'HTML:', openaiHTML);
             throw new Error('Component creation failed when trying to replace existing component.');
           }
-          
+
           // Remove the original component *after* successfully adding the new one
           component.remove();
-          
+
           // Select the newly added component(s)
           const firstNew = Array.isArray(newComponents) ? newComponents[0] : newComponents;
           if (firstNew) {
-              editor.select(firstNew);
+            editor.select(firstNew);
           }
-          
+
         } catch (replaceError) {
           console.error('Error replacing component in place:', replaceError, 'HTML:', openaiHTML);
           // Add more context to the error
@@ -304,7 +304,7 @@ export default (editor, opts = {}) => {
           throw new Error('Component creation failed from generated HTML.');
         }
       }
-      
+
       // Optional: Select the first added component if needed
       // if (Array.isArray(addedComponents) && addedComponents.length > 0) {
       //   editor.select(addedComponents[0]);
@@ -313,13 +313,13 @@ export default (editor, opts = {}) => {
       // }
       // No need to manually set ID or render, addComponents handles it.
       modal.close();
-      
-          } catch (error) {
-            console.error('Error in generateHTML:', {
-              error: error.message,
-              // Avoid logging potentially large response object on error
-                componentId: component?.getId() // Log component ID instead of full attributes
-              });
+
+    } catch (error) {
+      console.error('Error in generateHTML:', {
+        error: error.message,
+        // Avoid logging potentially large response object on error
+        componentId: component?.getId() // Log component ID instead of full attributes
+      });
       editor.log(`Failed to generate HTML: ${error.message}`, { level: 'error' });
     }
   }
@@ -469,7 +469,7 @@ export default (editor, opts = {}) => {
     editor.once('modal:open', () => {
       const modalContentEl = modal.getContentEl();
       if (!modalContentEl) return console.error('HTML modal content element not found.');
-  
+
       // Generate button listener - simplified approach
       const generateBtn = modalContentEl.querySelector('#generate-html-btn');
       if (generateBtn) {
@@ -478,79 +478,82 @@ export default (editor, opts = {}) => {
       } else {
         console.error('Generate HTML button not found in modal content');
       }
-  
+
       // Toggle button listener (clone/replace)
       const toggleBtn = modalContentEl.querySelector('#toggle-input-mode');
       const plainSection = modalContentEl.querySelector('#plain-language-section');
       const structuredSection = modalContentEl.querySelector('#structured-fields-section');
       const modalContainer = modalContentEl.querySelector('#html-prompt-creation-modal');
-  
+
       if (toggleBtn && plainSection && structuredSection && modalContainer) {
         // Set initial state
         modalContainer.setAttribute('data-input-mode', 'plain');
         structuredSection.style.display = 'none';
         plainSection.style.display = 'block';
         toggleBtn.textContent = 'Switch to Structured Input';
-  
+
         // Clone/replace toggle button to manage listener
         const newToggleBtn = toggleBtn.cloneNode(true);
         toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
-  
+
         newToggleBtn.addEventListener('click', () => { // Inline toggle logic again
-            const currentMode = modalContainer.getAttribute('data-input-mode');
-            if (currentMode === 'plain') {
-              plainSection.style.display = 'none';
-              structuredSection.style.display = 'block';
-              newToggleBtn.textContent = 'Switch to Plain Language Input';
-              modalContainer.setAttribute('data-input-mode', 'structured');
-            } else {
-              structuredSection.style.display = 'none';
-              plainSection.style.display = 'block';
-              newToggleBtn.textContent = 'Switch to Structured Input';
-              modalContainer.setAttribute('data-input-mode', 'plain');
-            }
+          const currentMode = modalContainer.getAttribute('data-input-mode');
+          if (currentMode === 'plain') {
+            plainSection.style.display = 'none';
+            structuredSection.style.display = 'block';
+            newToggleBtn.textContent = 'Switch to Plain Language Input';
+            modalContainer.setAttribute('data-input-mode', 'structured');
+          } else {
+            structuredSection.style.display = 'none';
+            plainSection.style.display = 'block';
+            newToggleBtn.textContent = 'Switch to Structured Input';
+            modalContainer.setAttribute('data-input-mode', 'plain');
+          }
         });
 
-  // Define custom trait type for AI buttons
-  editor.TraitManager.addType('ai-button', {
-    // Expects 'command' option
-    createInput({ trait }) {
-      const el = document.createElement('div');
-      const commandId = trait.get('command');
-      const label = trait.get('label') || 'Run Command';
-      el.innerHTML = `
+        // Define custom trait type for AI buttons
+        editor.TraitManager.addType('ai-button', {
+          // Expects 'command' option
+          createInput({ trait }) {
+            const el = document.createElement('div');
+            const commandId = trait.get('command');
+            const label = trait.get('label') || 'Run Command';
+            el.innerHTML = `
         <button type="button" class="gjs-trt-button" style="width: 100%; margin-top: 10px;">
           ${label}
         </button>
       `;
-      const button = el.querySelector('button');
-      // Use mousedown to trigger command, as click might be prevented by GrapesJS
-      button.addEventListener('mousedown', (e) => {
-         e.stopPropagation(); // Prevent GrapesJS from interfering
-         console.log(`AI Button Trait clicked, running command: ${commandId}`); // Debug log
-         editor.runCommand(commandId, { component: trait.target }); // Pass component context
-      });
-      return el;
-    },
-    // Prevent GrapesJS from handling value updates for this button
-    onUpdate() {},
-    onEvent() {},
-  });
+            const button = el.querySelector('button');
+            // Use mousedown to trigger command, as click might be prevented by GrapesJS
+            button.addEventListener('mousedown', (e) => {
+              e.stopPropagation(); // Prevent GrapesJS from interfering
+              console.log(`AI Button Trait clicked, running command: ${commandId} with options:`, {
+                hasApiKey: !!options.apiKey
+              });
+              editor.runCommand(commandId, {
+                component: trait.target,
+                apiKey: options.apiKey
+              });
+            });
+            return el;
+          },
+          // Prevent GrapesJS from handling value updates for this button
+          onUpdate() { },
+          onEvent() { },
+        });
 
-              } else console.error('Could not find elements for HTML input mode toggle.');
+      } else console.error('Could not find elements for HTML input mode toggle.');
     });
   }
 
 
   // Removed stray closing div tags
-// Removed stray backtick
+  // Removed stray backtick
 
-
-  // Removed htmlModelContent placeholder comment
 
   // Removed old openImageModal placeholder comment
 
-    // Removed stray backtick and placeholder comment
+  // Removed stray backtick and placeholder comment
 
   // Removed old openModal placeholder comment
 
@@ -574,60 +577,199 @@ export default (editor, opts = {}) => {
 
   // --- Custom AI Image Component ---
 
-  // 1. Define the generation function (modified from previous generateImage)
-  async function generateAiImageForComponent(component) {
-    if (!component || component.get('type') !== 'ai-image') {
-      editor.log('No ai-image component provided.', { level: 'warning' });
-      return;
-    }
-
-    const prompt = component.get('ai-prompt') || ''; // Get trait property directly
-        const size = component.get('ai-size') || '1024x1024'; // Get trait property directly
-
-    if (!prompt) {
-      editor.log('Please enter an image prompt in the component settings.', { level: 'warning' });
-      return;
-    }
-
-    // Indicate loading state (e.g., add a class, change placeholder?)
-    // Simple approach: just log
-    editor.log('Generating AI image...', { level: 'info' });
-    component.addClass('ai-image-loading'); // Add class to trigger CSS
-
-    try {
-      const response = await axios.post('https://api.openai.com/v1/images/generations', {
-        model: "dall-e-3",
-        prompt: prompt,
-        n: 1,
-        size: size,
-        style: "natural",
-        quality: "hd",
-        response_format: 'url'
-      }, {
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response?.data?.data?.[0]?.url) {
-        throw new Error('Invalid response format from OpenAI Image API');
-      }
-      const imageUrl = response.data.data[0].url;
-      component.addAttributes({ src: imageUrl });
-      editor.log('AI image generated successfully!', { level: 'info' });
-
-    } catch (error) {
-      console.error('Error generating AI image:', error);
-      let errorMsg = 'Failed to generate AI image.';
-      if (error.response?.data?.error?.message) {
-        errorMsg += ` ${error.response.data.error.message}`;
-      }
-      editor.log(errorMsg, { level: 'error' });
-    } finally {
-       component.removeClass('ai-image-loading'); // Remove class
-    }
+/**
+ * Generates an image using OpenAI DALL-E 3 based on component traits,
+ * uploads it to a backend server, and updates the component's src.
+ *
+ * @param {object} editor The GrapesJS editor instance.
+ * @param {object} component The GrapesJS component (should be type 'ai-image').
+ * @param {string} apiKey Your OpenAI API Key. **Handle this securely!**
+ * @param {string} uploadUrl The URL of your backend endpoint for image uploads.
+ */
+async function generateAiImageForComponent(editor, component, apiKey, uploadUrl) {
+  // --- 1. Input Validation ---
+  if (!editor) {
+    console.error('generateAiImageForComponent: GrapesJS Editor instance is required.');
+    // Or use editor.log if you are sure it's available at this point,
+    // but if editor itself is missing, editor.log will fail.
+    return;
   }
+  if (!component || typeof component.get !== 'function') {
+    editor.log('generateAiImageForComponent: Invalid component provided.', { level: 'error' });
+    return;
+  }
+  if (component.get('type') !== 'ai-image') {
+    editor.log(`generateAiImageForComponent: Component type is not 'ai-image' (found: ${component.get('type')}).`, { level: 'warning' });
+    return;
+  }
+  if (!apiKey) {
+    editor.log('generateAiImageForComponent: OpenAI API Key is missing.', { level: 'error' });
+    // Avoid proceeding without an API key
+    return;
+  }
+   if (!uploadUrl) {
+    editor.log('generateAiImageForComponent: Backend upload URL is missing.', { level: 'error' });
+    // Avoid proceeding without an upload URL
+    return;
+  }
+
+  // --- 2. Get Component Settings ---
+  // Note: Using component.get('trait-name') assumes you stored data using component.set().
+  // If traits map directly to attributes, use: component.getAttributes()['ai-prompt']
+  const prompt = component.get('ai-prompt') || '';
+  const size = component.get('ai-size') || '1024x1024'; // Default size if not set
+
+  if (!prompt) {
+    editor.log('Please enter an image prompt in the component settings.', { level: 'warning', ns: 'ai-image-generator' });
+    // Optionally, notify the user via UI as well
+    return;
+  }
+
+  // --- 3. Set Loading State ---
+  editor.log('Generating AI image...', { level: 'info', ns: 'ai-image-generator' });
+  component.addClass('ai-image-loading'); // Ensure you have corresponding CSS
+  // Consider adding a visual indicator directly on the component if possible
+
+  try {
+    // --- 4. Call OpenAI API ---
+    const openAiApiUrl = 'https://api.openai.com/v1/images/generations';
+    const openAiPayload = {
+      model: "dall-e-3",
+      prompt: prompt,
+      n: 1,
+      size: size,
+      style: "natural", // Or "vivid"
+      quality: "hd",    // Or "standard"
+      response_format: 'url'
+    };
+    const openAiHeaders = {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    };
+
+    editor.log('Calling OpenAI API...', { level: 'debug', ns: 'ai-image-generator' });
+    const response = await axios.post(openAiApiUrl, openAiPayload, { headers: openAiHeaders });
+
+    const imageUrl = response?.data?.data?.[0]?.url;
+    if (!imageUrl) {
+      // Attempt to get more specific error from OpenAI response if available
+      const errorDetail = response?.data?.error?.message || 'No image URL found in response.';
+      throw new Error(`Invalid response format from OpenAI Image API: ${errorDetail}`);
+    }
+    editor.log('OpenAI image URL received.', { level: 'debug', ns: 'ai-image-generator' });
+
+    // --- 5. Send Image URL to Backend ---
+    editor.log('Sending image URL to backend...', { level: 'debug', ns: 'ai-image-generator' });
+    const uploadResp = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        url: imageUrl
+      })
+    });
+    
+    if (!uploadResp.ok) {
+      let errorText;
+      try {
+        errorText = await uploadResp.text();
+        editor.log(`Upload failed with status ${uploadResp.status}: ${errorText}`, { level: 'error', ns: 'ai-image-generator' });
+      } catch (e) {
+        errorText = 'Could not read error response';
+        editor.log('Could not read error response text', { level: 'error', ns: 'ai-image-generator' });
+      }
+      throw new Error(`Failed to upload image to backend (Status: ${uploadResp.status}): ${errorText}`);
+    }
+    
+    editor.log('Upload response received', { level: 'debug', ns: 'ai-image-generator' });
+
+    const uploadData = await uploadResp.json();
+    // Support common variations for the returned URL key
+    const finalUrl = uploadData.public_url || uploadData.url || uploadData.data?.url;
+    if (!finalUrl) {
+      throw new Error('No public_url or url found in backend upload response.');
+    }
+
+    // --- 7. Update Component ---
+    component.addAttributes({ src: finalUrl });
+    // Optionally remove placeholder/styling related to empty image
+    // component.removeClass('ai-image-placeholder'); // Example
+    editor.log('AI image generated and uploaded successfully!', { level: 'info', ns: 'ai-image-generator' });
+
+  } catch (error) {
+    // --- 8. Handle Errors ---
+    console.error('Error generating AI image:', error); // Log detailed error to console
+    let userMessage = 'Failed to generate or upload AI image.';
+
+    if (error.response) {
+      // Axios error structure (e.g., from OpenAI API call)
+      userMessage += ` OpenAI API Error: ${error.response.data?.error?.message || error.message}`;
+    } else if (error.request) {
+      // Axios error structure - request made but no response
+       userMessage += ` Network error or no response received.`;
+    } else {
+      // Other errors (fetch errors, processing errors, etc.)
+      userMessage += ` Details: ${error.message}`;
+    }
+
+    editor.log(userMessage, { level: 'error', ns: 'ai-image-generator' });
+    // Optionally, display the userMessage in the UI
+
+  } finally {
+    // --- 9. Clean Up Loading State ---
+    component.removeClass('ai-image-loading');
+    editor.log('Finished AI image generation attempt.', { level: 'debug', ns: 'ai-image-generator' });
+  }
+}
+
+// --- How to potentially use it (Example within a GrapesJS context) ---
+/*
+editor.Commands.add('generate-ai-image', {
+  run(editor, sender, options = {}) {
+    const component = options.component || editor.getSelected();
+    if (!component) {
+      editor.log('No component selected or provided.', { level: 'warning' });
+      return;
+    }
+
+    // *** IMPORTANT: Get API Key and Upload URL securely ***
+    // DO NOT hardcode the API key here. Fetch it from a secure config service,
+    // environment variables on the server-side (if generating via backend proxy),
+    // or prompt the user (less secure).
+    const MY_OPENAI_API_KEY = "sk-your-key-here"; // Replace with secure retrieval method
+    const MY_BACKEND_UPLOAD_URL = "http://localhost/api/upload-image"; // Replace with actual/configured URL
+
+    generateAiImageForComponent(editor, component, MY_OPENAI_API_KEY, MY_BACKEND_UPLOAD_URL);
+  }
+});
+
+// You might trigger this command from a button in the component's toolbar
+// or settings panel.
+*/
+
+// --- Required CSS (Example) ---
+/*
+.ai-image-loading {
+  position: relative;
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.ai-image-loading::after {
+  content: 'Generating...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  z-index: 10; // Ensure it's above the potentially semi-opaque image
+}
+*/
 
   // 2. Define the new component type
   editor.Components.addType('ai-image', {
@@ -672,13 +814,32 @@ export default (editor, opts = {}) => {
 
   // 3. Define the command triggered by the button trait
   editor.Commands.add('trigger-ai-image-generation', {
-    run: (editor, sender, options) => {
-      const component = options?.component || editor.getSelected(); // Get component from options or selection
-      if (component && component.get('type') === 'ai-image') {
-        generateAiImageForComponent(component);
-      } else {
-        editor.log('Please select an AI Image component.', { level: 'warning' });
+    run: (editor, sender, options = {}) => {
+      console.log('trigger-ai-image-generation command running with plugin options:', {
+        hasApiKey: !!opts.apiKey,
+      });
+      
+      const component = options?.component || editor.getSelected();
+      if (!component) {
+        console.error('No component selected or provided');
+        editor.log('No component selected or provided', { level: 'error' });
+        return;
       }
+
+      if (component.get('type') !== 'ai-image') {
+        console.error('Selected component is not an AI Image component');
+        editor.log('Please select an AI Image component', { level: 'warning' });
+        return;
+      }
+
+      // Use the plugin options instead of command options
+      if (!opts.apiKey) {
+        console.error('API Key is missing');
+        editor.log('OpenAI API Key is missing. Please check your configuration.', { level: 'error' });
+        return;
+      }
+
+      generateAiImageForComponent(editor, component, opts.apiKey, "http://localhost/api/upload-image-from-url");
     }
   });
 
@@ -693,18 +854,18 @@ export default (editor, opts = {}) => {
   loadBlocks(editor, options);
 
   // Removed image component extension placeholder comment
-  
-    // Command to open the image generation modal (Now unused, remove?)
-    // editor.Commands.add('open-image-prompt-modal', {
-    //   run: (editor, sender) => {
-    //     const selectedComponent = editor.getSelected();
-    //     if (!selectedComponent || selectedComponent.get('type') !== 'image') {
-    //       editor.log('Please select an image component first.', { level: 'warning' });
-    //       return;
-    //     }
-    //     openImageModal();
-    //   }
-    // });
+
+  // Command to open the image generation modal (Now unused, remove?)
+  // editor.Commands.add('open-image-prompt-modal', {
+  //   run: (editor, sender) => {
+  //     const selectedComponent = editor.getSelected();
+  //     if (!selectedComponent || selectedComponent.get('type') !== 'image') {
+  //       editor.log('Please select an image component first.', { level: 'warning' });
+  //       return;
+  //     }
+  //     openImageModal();
+  //   }
+  // });
   // Removed open-image-prompt-modal command definition
 
 
@@ -734,10 +895,10 @@ export default (editor, opts = {}) => {
       sender && sender.set('active', false); // Deactivate the button
 
 
-  // Removed placeholder comments
+      // Removed placeholder comments
 
       // Open the prompt creation UI
-            openHtmlModal(); // This call remains for the HTML generation button
+      openHtmlModal(); // This call remains for the HTML generation button
     }
   });
   editor.Panels.addButton('options', {
@@ -748,3 +909,4 @@ export default (editor, opts = {}) => {
   });
 
 }
+
