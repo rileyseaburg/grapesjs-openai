@@ -738,7 +738,7 @@ editor.Commands.add('generate-ai-image', {
     // environment variables on the server-side (if generating via backend proxy),
     // or prompt the user (less secure).
     const MY_OPENAI_API_KEY = "sk-your-key-here"; // Replace with secure retrieval method
-    const MY_BACKEND_UPLOAD_URL = "http://localhost/api/upload-image"; // Replace with actual/configured URL
+    const MY_BACKEND_UPLOAD_URL = "/api/upload-image"; // Replace with actual/configured URL
 
     generateAiImageForComponent(editor, component, MY_OPENAI_API_KEY, MY_BACKEND_UPLOAD_URL);
   }
@@ -839,7 +839,7 @@ editor.Commands.add('generate-ai-image', {
         return;
       }
 
-      generateAiImageForComponent(editor, component, opts.apiKey, "http://localhost/api/upload-image-from-url");
+      generateAiImageForComponent(editor, component, opts.apiKey, "/api/upload-image-from-url");
     }
   });
 
