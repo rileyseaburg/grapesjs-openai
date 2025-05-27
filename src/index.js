@@ -199,7 +199,73 @@ export default (editor, opts = {}) => {
       const messages = [
         {
           "role": "system",
-          "content": `You are a web development assistant. Generate a SINGLE version of HTML based on the user's specifications. Do NOT provide multiple variations or options. You are required to create fully responsive components that are mobile first and responsive for all screen sizes including altra wide. You must create components taht use tailwind as the css library and they must be darkmode and light mode responsive by default. this means all components need to respond to light mode and dark mode. Respond ONLY with a valid JSON object containing the single generated HTML under a key named 'html_content'. Example: {\"html_content\": \"<div>Example HTML</div>\"}`
+          "content": `You are a web development assistant for Spotless Bin Co. Generate a SINGLE version of HTML based on the user's specifications. Do NOT provide multiple variations or options. You are required to create fully responsive components that are mobile first and responsive for all screen sizes including ultra wide.
+
+You must create components that use Tailwind CSS with the following custom theme for Spotless Bin Co:
+
+// Spotless Bin Co Theme
+theme: {
+  extend: {
+    colors: {
+      spotlessBlue: {
+        50: '#eaf6ff',
+        100: '#cbeaff',
+        200: '#a4dcff',
+        300: '#74caff',
+        400: '#3bb3ff',
+        500: '#009cff', // Primary Brand Blue
+        600: '#0088e6',
+        700: '#0072c2',
+        800: '#005d9e',
+        900: '#004a80',
+      },
+      spotlessGreen: {
+        50: '#f0fcf4',
+        100: '#d8f9e5',
+        200: '#b0f2ca',
+        300: '#78e5a5',
+        400: '#3ed57d',
+        500: '#00c853', // Secondary Brand Green
+        600: '#00b046',
+        700: '#008c39',
+        800: '#006e2d',
+        900: '#005723',
+      },
+      grayNeutral: {
+        50: '#f9fafb',
+        100: '#f3f4f6',
+        200: '#e5e7eb',
+        300: '#d1d5db',
+        400: '#9ca3af',
+        500: '#6b7280', // Standard neutral
+        600: '#4b5563',
+        700: '#374151',
+        800: '#1f2937',
+        900: '#111827',
+      },
+    },
+    fontFamily: {
+      sans: ['Inter', 'sans-serif'],
+    },
+    boxShadow: {
+      'spotless': '0 10px 15px -3px rgba(0, 156, 255, 0.1), 0 4px 6px -2px rgba(0, 156, 255, 0.05)',
+    },
+  },
+}
+
+You MUST use these brand colors in your HTML:
+- Use spotlessBlue-500 (#009cff) as the primary color for buttons, key UI elements, and accents
+- Use spotlessGreen-500 (#00c853) for secondary actions, success states, and call-to-action highlights
+- Use grayNeutral shades for text, backgrounds, and non-accent UI elements
+- For headings and important text, use grayNeutral-800 or grayNeutral-900
+- For body text, use grayNeutral-600 or grayNeutral-700
+- For dark mode, invert appropriately using dark: variants with the Tailwind classes
+- Use the font-sans class to apply the Inter font family
+- Apply boxShadow-spotless to cards, buttons, and other elements that need elevation
+
+All components must be properly branded for Spotless Bin Co. Do not use generic blue, green, or gray colors. Components must be darkmode and light mode responsive by default.
+
+Respond ONLY with a valid JSON object containing the single generated HTML under a key named 'html_content'. Example: {\"html_content\": \"<div>Example HTML</div>\"}`
         },
         {
           "role": "user",
@@ -378,14 +444,14 @@ export default (editor, opts = {}) => {
     <button class="text-2xl" onclick="editor.Modal.close()">&times;</button>
   </div>
   <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold">Generate Landing Page HTML</h2>
+        <h2 class="text-xl font-bold">Generate Spotless Bin Co. HTML</h2>
         <button id="toggle-input-mode" class="text-sm text-blue-600 hover:underline">Switch to Structured Input</button>
       </div>
   
       <div id="plain-language-section">
         <div class="flex flex-col mb-3">
           <label for="html-plain-description" class="mb-1 font-semibold">Describe what you want (Plain Language):</label>
-          <textarea id="html-plain-description" rows="4" placeholder="e.g., A hero section..." class="border p-1 rounded"></textarea>
+          <textarea id="html-plain-description" rows="4" placeholder="e.g., A hero section with a large image on the left, headline, subheadline, and a 'Learn More' button on the right. Will use Spotless Bin Co. brand colors automatically." class="border p-1 rounded"></textarea>
         </div>
         <div class="flex flex-col mb-4">
           <label for="html-model-select" class="mb-1 font-semibold">OpenAI Model:</label>
