@@ -263,7 +263,7 @@ You MUST use these brand colors in your HTML:
 - Use the font-sans class to apply the Inter font family
 - Apply boxShadow-spotless to cards, buttons, and other elements that need elevation
 
-All components must be properly branded for Spotless Bin Co. Do not use generic blue, green, or gray colors.
+All components must be properly branded for Spotless Bin Co. Do not use generic blue, green, or gray colors. Components must be darkmode and light mode responsive by default.
 
 Respond ONLY with a valid JSON object containing the single generated HTML under a key named 'html_content'. Example: {\"html_content\": \"<div>Example HTML</div>\"}`
         },
