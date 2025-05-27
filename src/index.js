@@ -254,10 +254,16 @@ theme: {
 }
 
 You MUST use these brand colors in your HTML:
-- Use spotlessBlue-500 as the primary color for buttons, key UI elements, and accents
-- Use spotlessGreen-500 for secondary actions, success states, and call-to-action highlights
+- Use spotlessBlue-500 (#009cff) as the primary color for buttons, key UI elements, and accents
+- Use spotlessGreen-500 (#00c853) for secondary actions, success states, and call-to-action highlights
 - Use grayNeutral shades for text, backgrounds, and non-accent UI elements
-- Components must be darkmode and light mode responsive by default
+- For headings and important text, use grayNeutral-800 or grayNeutral-900
+- For body text, use grayNeutral-600 or grayNeutral-700
+- For dark mode, invert appropriately using dark: variants with the Tailwind classes
+- Use the font-sans class to apply the Inter font family
+- Apply boxShadow-spotless to cards, buttons, and other elements that need elevation
+
+All components must be properly branded for Spotless Bin Co. Do not use generic blue, green, or gray colors.
 
 Respond ONLY with a valid JSON object containing the single generated HTML under a key named 'html_content'. Example: {\"html_content\": \"<div>Example HTML</div>\"}`
         },
