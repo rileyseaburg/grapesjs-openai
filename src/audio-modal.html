@@ -1,0 +1,51 @@
+<div id="audio-prompt-creation-modal" class="p-4">
+  <!-- close button -->
+  <div class="absolute top-0 right-0 p-4 z-10">
+    <button class="text-2xl" onclick="editor.Modal.close()">&times;</button>
+  </div>
+  
+  <h2 class="text-xl font-bold mb-4">Generate Audio Response with AI</h2>
+
+  <div class="flex flex-col mb-3">
+    <label for="audio-instructions" class="mb-1 font-semibold">Text to Convert to Speech:</label>
+    <textarea id="audio-instructions" rows="4" placeholder="Enter the text you want to convert to speech..." class="border p-1 rounded"></textarea>
+  </div>
+
+  <div class="flex flex-col mb-3">
+    <label for="audio-voice" class="mb-1 font-semibold">Voice:</label>
+    <select id="audio-voice" class="border p-1 rounded bg-white">
+      <option value="alloy">Alloy</option>
+      <option value="echo">Echo</option>
+      <option value="fable">Fable</option>
+      <option value="onyx">Onyx</option>
+      <option value="nova">Nova</option>
+      <option value="shimmer">Shimmer</option>
+    </select>
+  </div>
+
+  <div class="flex flex-col mb-3">
+    <label for="audio-format" class="mb-1 font-semibold">Audio Format:</label>
+    <select id="audio-format" class="border p-1 rounded bg-white">
+      <option value="wav">WAV</option>
+      <option value="mp3">MP3</option>
+      <option value="flac">FLAC</option>
+      <option value="aac">AAC</option>
+    </select>
+  </div>
+
+  <div class="flex flex-col mb-4">
+    <label for="audio-model-select" class="mb-1 font-semibold">OpenAI Model:</label>
+    <select id="audio-model-select" class="border p-1 rounded bg-white">
+      <option value="gpt-4o-audio-preview">GPT-4o Audio Preview</option>
+      <option value="gpt-4o-mini-tts">GPT-4o Mini TTS</option>
+      <option value="tts-1">TTS-1</option>
+      <option value="tts-1-hd">TTS-1 HD</option>
+    </select>
+  </div>
+
+  <div id="audio-spinner" style="display: none;" class="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500 mr-3"></div>
+  <div class="mt-6 text-right">
+    <button
+      class="rounded-md bg-orange-600 hover:bg-orange-700 text-white px-5 py-2" id="generate-audio-btn">Generate Audio</button>
+  </div>
+</div>
