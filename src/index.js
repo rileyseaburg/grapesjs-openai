@@ -454,9 +454,18 @@ export default (editor, opts = {}) => {
       <div class="flex flex-col my-4">
           <label for="html-model-select" class="mb-1 font-semibold">OpenAI Model:</label>
           <select id="html-model-select" class="border p-1 rounded bg-white">
-            <option value="gpt-4o">GPT-4o (Recommended)</option>
+            <option value="gpt-4.1">GPT-4.1</option>
+            <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+            <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+            <option value="gpt-4.5-preview">GPT-4.5 Preview</option>
+            <option value="gpt-4o">GPT-4o</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
             <option value="gpt-4-turbo">GPT-4 Turbo</option>
-            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            <option value="o3">O3</option>
+            <option value="o4-mini">O4 Mini</option>
+            <option value="o3-mini">O3 Mini</option>
+            <option value="o1-mini">O1 Mini</option>
+            <option value="codex-mini-latest">Codex Mini Latest</option>
           </select>
       </div>
       <div class="mt-6 text-right flex items-center justify-end">
