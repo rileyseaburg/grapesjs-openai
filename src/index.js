@@ -412,22 +412,32 @@ Respond ONLY with a valid JSON object containing the single generated HTML under
       <button class="text-2xl" onclick="editor.Modal.close()">&times;</button>
     </div>
     <div class="flex flex-col mb-3">
-        <label for="text-instructions" class="mb-1 font-semibold">Instructions:</label>
-        <textarea id="text-instructions" rows="4" placeholder="Describe the text you want to generate..." class="border p-1 rounded"></textarea>
-      </div>
-      <div class="flex flex-col mb-3">
-        <label for="text-tone-style" class="mb-1 font-semibold">Tone/Style:</label>
-        <input type="text" id="text-tone-style" placeholder="e.g., professional, friendly" class="border p-1 rounded">
+      <label for="text-instructions" class="mb-1 font-semibold">Instructions:</label>
+      <textarea id="text-instructions" rows="4" placeholder="Describe the text you want to generate..." class="border p-1 rounded"></textarea>
+    </div>
+    <div class="flex flex-col mb-3">
+      <label for="text-tone-style" class="mb-1 font-semibold">Tone/Style:</label>
+      <input type="text" id="text-tone-style" placeholder="e.g., professional, friendly" class="border p-1 rounded">
+    </div>
     <div class="flex flex-col mt-4">
       <label for="text-model-select">OpenAI Model:</label>
       <select id="text-model-select">
-        <option value="gpt-4.1-2025-04-14">GPT-4.1 (2025-04-14)</option>
-        <option value="gpt-4o">GPT-4o</option>
-        <option value="gpt-4o-mini">GPT-4o Mini</option>
-        <option value="gpt-4-turbo">GPT-4 Turbo</option>
-        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-        <option value="o1">O1</option>
-        <option value="o1-mini">O1 Mini</option>
+        <option value="gpt-4.1-2025-04-14">GPT-4.1</option>
+        <option value="gpt-4.1-mini-2025-04-14">GPT-4.1-mini</option>
+        <option value="gpt-4.1-nano-2025-04-14">GPT-4.1-nano</option>
+        <option value="gpt-4.5-preview-2025-02-27">GPT-4.5-preview</option>
+        <option value="gpt-4o-2024-08-06">GPT-4o</option>
+        <option value="gpt-4o-realtime-preview-2024-12-17">GPT-4o-realtime-preview</option>
+        <option value="gpt-4o-mini-2024-07-18">GPT-4o-mini</option>
+        <option value="gpt-4o-mini-audio-preview-2024-12-17">GPT-4o-mini-audio-preview</option>
+        <option value="gpt-4o-mini-realtime-preview-2024-12-17">GPT-4o-mini-realtime-preview</option>
+        <option value="o1-2024-12-17">O1</option>
+        <option value="o1-pro-2025-03-19">O1-pro</option>
+        <option value="o3-pro-2025-06-10">O3-pro</option>
+        <option value="o3-2025-04-16">O3</option>
+        <option value="o4-mini-2025-04-16">O4-mini</option>
+        <option value="o3-mini-2025-01-31">O3-mini</option>
+        <option value="o1-mini-2024-09-12">O1-mini</option>
       </select>
     </div>
     <div class="mt-6">
